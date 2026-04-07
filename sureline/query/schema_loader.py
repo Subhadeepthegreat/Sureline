@@ -25,7 +25,7 @@ def load_sqlite_schema(db_path: Path) -> str:
           - department (TEXT) — values: "Rocket Propulsion", "Satellite Division", ...
           ...
     """
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     cursor = conn.cursor()
 
     # Get all tables

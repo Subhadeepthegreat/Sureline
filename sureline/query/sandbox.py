@@ -3,14 +3,13 @@ Sureline — Sandboxed Query Execution
 
 Executes generated SQL or Pandas code in a restricted environment.
 Safety features:
-  - SQL: read-only (no INSERT/UPDATE/DELETE/DROP/ALTER)
-  - Pandas: restricted namespace (no os, sys, subprocess, etc.)
+  - SQL: read-only (no INSERT/UPDATE/DELETE/DROP/ALTER); comment-stripped before token check
+  - Pandas: RestrictedPython bytecode sandbox + allowlist pd proxy (default deny)
   - Timeout: all queries capped at QUERY_TIMEOUT seconds
   - Results: capped at 50 rows to avoid LLM context overflow
 """
 
 import sqlite3
-import signal
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -19,6 +18,63 @@ from typing import Any, Optional
 import pandas as pd
 
 from sureline.config import QUERY_TIMEOUT
+
+# ─── Safe pandas adapter ─────────────────────────────────────────
+# RestrictedPython blocks `import` at the bytecode level but does NOT
+# prevent calling I/O methods on objects in trusted globals (e.g. pd.read_csv).
+# A blocklist is insufficient because pd.io.parsers.readers.read_csv() bypasses
+# name-level checks via submodule attribute chaining. Use an allowlist instead:
+# only expose the DataFrame/Series transform names that LLM-generated code needs.
+_PANDAS_ALLOWED = frozenset({
+    # Core types
+    "DataFrame", "Series", "Index", "MultiIndex",
+    "Categorical", "CategoricalDtype", "Timestamp", "Timedelta", "NaT", "NA",
+    # Constructors / combiners
+    "concat", "merge", "merge_asof", "merge_ordered",
+    "pivot", "pivot_table", "crosstab", "cut", "qcut", "melt",
+    "wide_to_long", "get_dummies",
+    # Type coercion
+    "to_numeric", "to_datetime", "to_timedelta",
+    # Misc utilities safe for analysis
+    "isna", "isnull", "notna", "notnull",
+    "date_range", "bdate_range", "period_range", "timedelta_range",
+    "options", "set_option", "reset_option",
+    "NamedAgg",
+})
+
+
+class _SafePandas:
+    """Allowlist proxy — only exposes DataFrame transform names to sandboxed code."""
+
+    def __getattr__(self, name: str):
+        if name not in _PANDAS_ALLOWED:
+            raise AttributeError(
+                f"pd.{name} is not available in sandboxed code. "
+                "Use the pre-loaded `df` DataFrame instead."
+            )
+        return getattr(pd, name)
+
+
+# ─── Sandboxed attribute guard ────────────────────────────────────
+# _GETATTR_BLOCKED covers I/O method names on ANY object — not just pd.xxx.
+# Without this, df.to_csv('/path') bypasses _SafePandas because RestrictedPython
+# transforms `df.to_csv` into `_getattr_(df, 'to_csv')`, and if _getattr_ is just
+# a transparent `getattr`, the DataFrame I/O method is reachable directly.
+_GETATTR_BLOCKED = frozenset({
+    "to_csv", "to_json", "to_excel", "to_parquet", "to_sql",
+    "to_hdf", "to_feather", "to_pickle", "to_stata", "to_gbq",
+    "to_clipboard", "to_latex", "to_markdown", "to_html",
+    "to_xml", "to_orc",
+})
+
+
+def _sandboxed_getattr(obj, name: str):
+    """Custom _getattr_ guard — blocks I/O method names on any object."""
+    if name in _GETATTR_BLOCKED:
+        raise AttributeError(
+            f"'{name}' is not available in sandboxed code."
+        )
+    return getattr(obj, name)
 
 
 # ─── SQL blacklist ───────────────────────────────────────────────
@@ -46,11 +102,14 @@ class QueryResult:
 
 def _is_read_only_sql(sql: str) -> bool:
     """Check that SQL query is read-only (no destructive operations)."""
-    # Normalize — remove comments and check tokens
-    cleaned = " ".join(sql.upper().split())
+    import re
+    # Strip single-line (--) and block (/* */) comments before tokenising
+    # so that tricks like "SELECT 1 -- DROP TABLE foo" don't bypass the check
+    no_comments = re.sub(r"--[^\n]*", " ", sql)
+    no_comments = re.sub(r"/\*.*?\*/", " ", no_comments, flags=re.DOTALL)
+    tokens = no_comments.upper().split()
     for keyword in SQL_WRITE_KEYWORDS:
-        # Check for keyword at word boundaries
-        if keyword in cleaned.split():
+        if keyword in tokens:
             return False
     return True
 
@@ -79,8 +138,11 @@ def execute_sql(db_path: Path, sql: str) -> QueryResult:
     start = time.time()
 
     try:
-        # Open in read-only mode using URI
-        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        # Open in read-only mode using URI.
+        # check_same_thread=False: the connection is used across threads below
+        # (run_query thread uses the cursor). Safe here because mode=ro means
+        # no writes can occur, and SQLite handles concurrent reads correctly.
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -156,7 +218,7 @@ def execute_sql(db_path: Path, sql: str) -> QueryResult:
         )
 
 
-def execute_pandas(csv_path: Path, code: str) -> QueryResult:
+def execute_pandas(csv_path: Path, code: str, cached_df=None) -> QueryResult:
     """
     Execute Pandas code in a sandboxed namespace.
 
@@ -164,47 +226,39 @@ def execute_pandas(csv_path: Path, code: str) -> QueryResult:
     a DataFrame or a scalar value.
 
     Args:
-        csv_path: Path to the CSV file.
+        csv_path: Path to the CSV file (used only when cached_df is None).
         code: Python code to execute (using pandas as pd).
+        cached_df: Pre-loaded DataFrame. When provided, skips pd.read_csv()
+                   on the hot path (major latency saving for repeated calls).
 
     Returns:
         QueryResult with data or error.
     """
     import time
-
-    # Restricted namespace — only allow pandas and basic builtins
-    safe_builtins = {
-        "len": len, "sum": sum, "min": min, "max": max,
-        "int": int, "float": float, "str": str, "bool": bool,
-        "list": list, "dict": dict, "tuple": tuple,
-        "range": range, "sorted": sorted, "round": round,
-        "abs": abs, "enumerate": enumerate, "zip": zip,
-        "True": True, "False": False, "None": None,
-    }
-
-    namespace = {
-        "__builtins__": safe_builtins,
-        "pd": pd,
-        "df": pd.read_csv(csv_path),
-    }
+    from RestrictedPython import compile_restricted, safe_globals, safe_builtins
+    from RestrictedPython.Eval import default_guarded_getitem
 
     start = time.time()
 
     try:
-        # Check for dangerous imports
-        dangerous = ["import os", "import sys", "import subprocess", "import shutil",
-                      "__import__", "eval(", "exec(", "open(", "compile("]
-        for d in dangerous:
-            if d in code:
-                return QueryResult(
-                    success=False,
-                    generated_query=code,
-                    query_type="pandas",
-                    error=f"Forbidden operation detected: {d}",
-                )
+        # Compile at bytecode level — RestrictedPython rejects any import,
+        # attribute access, or dunder that isn't explicitly allowed.
+        byte_code = compile_restricted(code, filename="<llm_generated>", mode="exec")
 
-        # Execute in restricted namespace
-        exec(code, namespace)
+        df = cached_df if cached_df is not None else pd.read_csv(csv_path)
+        restricted_globals = {
+            **safe_globals,
+            "__builtins__": safe_builtins,
+            "pd": _SafePandas(),   # I/O methods blocked; DataFrame ops allowed
+            "df": df,
+            # RestrictedPython transforms df['col'] → _getitem_(df, 'col')
+            # and df.method()   → _getattr_(df, 'method') — both must be provided.
+            "_getitem_": default_guarded_getitem,
+            "_getattr_": _sandboxed_getattr,
+        }
+
+        exec(byte_code, restricted_globals)
+        namespace = restricted_globals
 
         elapsed = (time.time() - start) * 1000
 

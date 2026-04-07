@@ -11,6 +11,8 @@ from typing import Optional
 
 import structlog
 
+from sureline.config import LATENCY_TARGETS
+
 
 def setup_logging(level: str = "INFO") -> None:
     """
@@ -67,14 +69,28 @@ class PipelineEventLogger:
     def stt_transcript_received(self, session_id: str, text: str, latency_ms: float) -> None:
         self._log.info("stt_transcript_received", session_id=session_id,
                       text=text[:100], latency_ms=round(latency_ms, 1))
+        self._check_budget("stt", latency_ms)
 
     def query_generated(self, session_id: str, query_type: str, query: str) -> None:
         self._log.info("query_generated", session_id=session_id,
                       query_type=query_type, query=query[:200])
 
+    def _check_budget(self, component: str, actual_ms: float) -> None:
+        """Warn when a component exceeds its latency budget from LATENCY_TARGETS."""
+        target_s = LATENCY_TARGETS.get(component)
+        if target_s and actual_ms > target_s * 1000:
+            self._log.warning(
+                "latency_budget_exceeded",
+                component=component,
+                actual_ms=round(actual_ms, 1),
+                target_ms=round(target_s * 1000, 1),
+                delta_ms=round(actual_ms - target_s * 1000, 1),
+            )
+
     def query_executed(self, session_id: str, success: bool, latency_ms: float) -> None:
         self._log.info("query_executed", session_id=session_id,
                       success=success, latency_ms=round(latency_ms, 1))
+        self._check_budget("llm_inference", latency_ms)
 
     def query_result_received(self, session_id: str, row_count: int) -> None:
         self._log.info("query_result_received", session_id=session_id, row_count=row_count)
@@ -91,6 +107,7 @@ class PipelineEventLogger:
 
     def tts_audio_streamed(self, session_id: str, latency_ms: float) -> None:
         self._log.info("tts_audio_streamed", session_id=session_id, latency_ms=round(latency_ms, 1))
+        self._check_budget("tts_ttfb", latency_ms)
 
     def barge_in_detected(self, session_id: str) -> None:
         self._log.info("barge_in_detected", session_id=session_id)

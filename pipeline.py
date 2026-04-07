@@ -43,7 +43,9 @@ from pipecat.services.openai.llm import OpenAILLMService
 from sureline.conversation.conversation_engine import ConversationEngine
 from sureline.config import (
     DB_PATH, OLLAMA_MODEL,
-    LLM_PROVIDER, GEMINI_API_KEY, GEMINI_MODEL, GEMINI_BASE_URL,
+    AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_MODEL,
+    OPENAI_API_KEY, OPENAI_MODEL,
+    GEMINI_API_KEY, GEMINI_MODEL, GEMINI_BASE_URL,
 )
 from sureline.stt.stt_module import create_stt_service
 from sureline.tts.tts_module import create_tts_service
@@ -53,23 +55,30 @@ from sureline.tts.tts_module import create_tts_service
 
 def create_llm_service():
     """
-    Return the appropriate LLM service based on LLM_PROVIDER:
-      auto   → Gemini if GEMINI_API_KEY is set, else Ollama
-      gemini → Gemini (OpenAI-compatible endpoint)
-      ollama → local Ollama
+    Return the appropriate Pipecat streaming LLM service.
+
+    Priority (auto mode): Azure OpenAI → OpenAI → Gemini → Ollama.
+    Mirrors the hierarchy in config.create_llm_client() but returns
+    a Pipecat FrameProcessor (streaming) instead of openai.AsyncOpenAI.
     """
-    use_gemini = (
-        LLM_PROVIDER == "gemini"
-        or (LLM_PROVIDER == "auto" and bool(GEMINI_API_KEY))
-    )
-    if use_gemini:
+    if AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT:
+        status(f"[LLM        ] Using Azure OpenAI ({AZURE_OPENAI_MODEL})")
+        return OpenAILLMService(
+            api_key=AZURE_OPENAI_API_KEY,
+            base_url=f"{AZURE_OPENAI_ENDPOINT.rstrip('/')}/openai/deployments/{AZURE_OPENAI_MODEL}/",
+            model=AZURE_OPENAI_MODEL,
+        )
+    if OPENAI_API_KEY:
+        status(f"[LLM        ] Using OpenAI ({OPENAI_MODEL})")
+        return OpenAILLMService(api_key=OPENAI_API_KEY, model=OPENAI_MODEL)
+    if GEMINI_API_KEY:
         status(f"[LLM        ] Using Gemini ({GEMINI_MODEL}) via OpenAI-compat API")
         return OpenAILLMService(
             api_key=GEMINI_API_KEY,
             base_url=GEMINI_BASE_URL,
             model=GEMINI_MODEL,
         )
-    status(f"[LLM        ] Using Ollama ({OLLAMA_MODEL}) locally")
+    status(f"[LLM        ] Using Ollama ({OLLAMA_MODEL}) locally (dev only)")
     return OLLamaLLMService(settings=OLLamaLLMService.Settings(model=OLLAMA_MODEL))
 
 # Silence the noisy debug logs — only show warnings+ from pipecat internals
@@ -133,26 +142,41 @@ class SurelineContextProcessor(FrameProcessor):
     async def _enrich_and_push(self, question: str) -> None:
         try:
             status(f"[STT  heard ] {question}")
-            status("[Context    ] Querying database + RAG...")
 
-            def run_context_logic():
-                session = self.engine._get_session("voice_session")
-                session.add_user_message(question)
-                rag_context = self.engine.rag.get_context_string(question, n_results=3)
-                query_result = self.engine.query_engine.query(question)
-                messages = self.engine.build_messages(
-                    question, query_result, rag_context, session
-                )
-                return messages
+            # Push filler immediately so TTS has something to say while
+            # both LLM calls (RAG + SQL) are running in parallel.
+            await self.push_frame(TextFrame(text="Let me check that for you..."))
 
-            messages = await asyncio.to_thread(run_context_logic)
+            status("[Context    ] RAG + SQL running in parallel...")
+
+            # Resolve caller-specific session ID; fall back for local/text mode
+            session_id = getattr(self, "_caller_id", None) or "local_session"
+            session = self.engine._get_session(session_id)
+            session.add_user_message(question)
+
+            rag_result, query_result = await asyncio.gather(
+                asyncio.to_thread(self.engine.rag.get_context_string, question, 3),
+                self.engine.query_engine.query(question),
+                return_exceptions=True,
+            )
+
+            rag_context = (
+                rag_result if not isinstance(rag_result, Exception)
+                else "No document context available."
+            )
+            if isinstance(query_result, Exception):
+                from sureline.query.sandbox import QueryResult as _QR
+                query_result = _QR(success=False, error=str(query_result))
+
+            messages = self.engine.build_messages(question, query_result, rag_context, session)
+
             status("[LLM        ] Generating response...")
             if self._timing is not None:
                 self._timing["llm_send_ts"] = time.perf_counter()
                 self._timing["first_token_ts"] = None
-            # LLMMessagesFrame is deprecated in pipecat 0.0.105+.
-            # LLMMessagesUpdateFrame(run_llm=True) is the correct replacement —
-            # it updates the context AND immediately triggers LLM generation.
+
+            # LLMMessagesUpdateFrame(run_llm=True) updates context AND triggers
+            # LLM generation in one frame (replaces deprecated LLMMessagesFrame).
             await self.push_frame(LLMMessagesUpdateFrame(messages=messages, run_llm=True))
 
         except asyncio.CancelledError:
@@ -212,7 +236,7 @@ async def terminal_input_loop(task: PipelineTask) -> None:
 # ─── Text mode ───────────────────────────────────────────────────
 
 async def run_text_mode() -> None:
-    engine = ConversationEngine(model_name=OLLAMA_MODEL, db_path=DB_PATH)
+    engine = ConversationEngine(db_path=DB_PATH)
 
     timing: dict = {}  # shared state for TTFT measurements
     context_processor = SurelineContextProcessor(engine, timing=timing)
@@ -244,7 +268,7 @@ async def run_voice_mode() -> None:
         await run_text_mode()
         return
 
-    engine = ConversationEngine(model_name=OLLAMA_MODEL, db_path=DB_PATH)
+    engine = ConversationEngine(db_path=DB_PATH)
 
     stt = create_stt_service()
     tts = create_tts_service()

@@ -1,0 +1,66 @@
+client_id: mahakash
+client_name: Mahakash
+company_description: >
+  Mahakash is a B2B software company with 80 employees across multiple departments.
+  It sells software products to enterprise clients and tracks sales, expenses, and headcount.
+
+database:
+  type: sqlite
+  path: data/mahakash.db
+
+nl_queries_enabled: true
+
+caller_verification:
+  method: pin
+  field: id   # employees.id used as PIN in demo mode
+
+fallback:
+  message: "Let me transfer you to our support team."
+  action: sip_transfer
+  target: ""
+
+schema_annotations:
+  employees:
+    description: "All Mahakash employees with salary and department info."
+  sales:
+    description: "Sales transactions linking products, clients, and salespersons."
+  expenses:
+    description: "Company expense records by department and category."
+  products:
+    description: "Product catalogue with pricing and stock levels."
+  clients:
+    description: "Enterprise clients (buyers), not internal employees."
+
+templated_queries:
+  - template: "What is the total salary bill?"
+    sql: "SELECT SUM(salary_monthly) AS total_monthly_salary FROM employees"
+    spoken: "The total monthly salary bill is {total_monthly_salary}."
+
+  - template: "How many employees are in {department}?"
+    sql: "SELECT COUNT(*) AS headcount FROM employees WHERE department = :department"
+    spoken: "There are {headcount} employees in {department}."
+
+  - template: "What were total sales in {quarter}?"
+    sql: "SELECT SUM(amount) AS total FROM sales WHERE quarter = :quarter"
+    spoken: "Total sales in {quarter} were {total}."
+
+golden_test_suite:
+  - input: "What is the total monthly salary across all employees?"
+    expected_sql_contains: "salary_monthly"
+    expected_spoken_contains: "salary"
+
+  - input: "How many employees do we have?"
+    expected_sql_contains: "employees"
+    expected_spoken_contains: ""
+
+  - input: "What were total sales this year?"
+    expected_sql_contains: "sales"
+    expected_spoken_contains: ""
+
+  - input: "Which department has the highest average salary?"
+    expected_sql_contains: "department"
+    expected_spoken_contains: ""
+
+  - input: "What are our top selling products?"
+    expected_sql_contains: "product"
+    expected_spoken_contains: ""
