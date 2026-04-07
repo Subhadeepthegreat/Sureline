@@ -1,0 +1,150 @@
+MAHAKASH SPACE PRIVATE LIMITED — Company Overview
+(Registered under the "We're Totally Going to Mars Eventually" Act of 2019)
+
+Founded: 2019
+Headquarters: Bengaluru, Karnataka, India
+CEO: Vikram "The Rocket Man" Joshi
+Tagline: "Reaching for the stars. Occasionally hitting pigeons."
+
+════════════════════════════════════════════════════════════════════
+
+ABOUT MAHAKASH
+
+Mahakash (Sanskrit for "The Great Space" — yes, we Googled it) is India's 
+most ambitiously optimistic private space company. We build satellites that 
+mostly work, rockets that usually go up, and space suits that look absolutely 
+fabulous.
+
+Founded in a garage in Koramangala (which we now call "Launch Pad Alpha"), 
+Mahakash has grown from 3 sleep-deprived engineers and a whiteboard to over 
+80 employees across 10 departments, including the legendary "Astro-Catering" 
+division, which has never once failed to deliver samosas to mission control 
+on launch day.
+
+════════════════════════════════════════════════════════════════════
+
+MISSION
+
+To democratize space access for every Indian business, from telecom giants 
+to the chai wallah who just wants better GPS for his delivery route.
+
+VISION
+
+A future where "I'll send you a satellite" is a normal thing to say in 
+a business meeting.
+
+VALUES
+
+1. AUDACITY — If no one laughs at your timeline, you're not dreaming big enough.
+2. JUGAAD — When NASA uses $50M test equipment, we use an auto-rickshaw 
+   chassis and a prayer. Same results. Mostly.
+3. CHAI-DRIVEN DEVELOPMENT — All critical engineering decisions are made 
+   between the 3rd and 5th chai of the day. Before 3rd chai: no cognition. 
+   After 5th chai: too much vibration for precision work.
+4. SAFETY FIRST (USUALLY) — We have never lost an employee. We have, however, 
+   lost 3 interns in the cafeteria. They were found 6 hours later in the 
+   testing lab, still debugging.
+
+════════════════════════════════════════════════════════════════════
+
+KEY PRODUCTS
+
+• MahaSat-1: Our flagship communication satellite. Currently orbiting Earth  
+  at 36,000 km and streaming exactly 847 channels of cricket.
+
+• MahaSat-Nano: A satellite so small it was accidentally mailed to a client  
+  in a Flipkart box. Still worked.
+
+• Pushpak Mk-I: Our first reusable launch vehicle. "Reusable" in the sense  
+  that we reuse the design drawings after each landing attempt.
+
+• Pushpak Mk-II: Learned from Mk-I. Now the rocket actually comes back.  
+  Usually to the right landing pad.
+
+• Akash Shield: Our space debris tracking system. Because apparently we're  
+  not the only ones leaving junk up there.
+
+• Orbit Express: Rideshare launches for small satellites. Basically Ola for  
+  space. "Your satellite has arrived. Rating: ⭐⭐⭐⭐"
+
+════════════════════════════════════════════════════════════════════
+
+DEPARTMENTS
+
+1. Rocket Propulsion — The loud ones. Office smells like burning kerosene.
+2. Satellite Division — The precise ones. Judge everyone's cable management.
+3. Mission Control — Live on coffee and anxiety. Very good at countdowns.
+4. Space Suit Design — Surprisingly fashionable. Submitted a design to 
+   Lakme Fashion Week. Were politely declined.
+5. Astro-Catering — Solve the hardest problem in space: how to make paneer 
+   tikka in zero gravity. Current success rate: 34%.
+6. Ground Operations — Make sure the rocket is pointing the right way. 
+   You'd be surprised how often this needs checking.
+7. Payload Engineering — Package things that cost more than your house into 
+   a tin can strapped to a controlled explosion.
+8. HR & Culture — Responsible for team-building events. Last event was 
+   "Escape the Clean Room" which was just regular work.
+9. Finance — The only department with a whiteboard that has actual numbers 
+   instead of rocket drawings.
+10. Marketing — "We need to disrupt the space economy" — actual quote from 
+    a marketing meeting. Followed immediately by "can we make it go viral?"
+
+════════════════════════════════════════════════════════════════════
+
+NOTABLE ACHIEVEMENTS
+
+• 2020: Successfully launched a test rocket. It was supposed to go 10 km. 
+  It went 10.3 km. We celebrate this extra 300 meters every year.
+
+• 2021: MahaSat-Nano deployed for AgriSat Corp. Farmers now get weather 
+  data 40% faster. Crop yields up 15%. Samosa consumption at Mahakash 
+  HQ also up 15% (correlation unclear).
+
+• 2022: Won ISRO contract for 3 communication satellites. Office party 
+  lasted 72 hours. Productivity dipped. Worth it.
+
+• 2023: Pushpak Mk-II achieved first successful vertical landing. The 
+  cheer from mission control registered on nearby seismographs.
+
+• 2024: Revenue crossed ₹500 crore. Finance department finally got a 
+  second whiteboard.
+
+• 2025: 80+ employees. International clients. Still can't fix the 
+  office WiFi in Building B.
+
+════════════════════════════════════════════════════════════════════
+
+UNACKNOWLEDGED (BUT LEGENDARY) ACHIEVEMENTS
+
+• The "BrahMos" Incident (2022): While testing the navigation system of a 
+  classified Pushpak payload, a glitch caused the prototype to alter its 
+  trajectory and accidentally drop into Pakistan. To our immense relief, the 
+  media and international community assumed it was an accidental firing of a 
+  BrahMos missile. The Indian Army (bless them) took the blame, a completely 
+  innocent wing commander got fired, and our CTO hasn't slept properly since. 
+  We sent the officer an anonymous fruit basket.
+
+• The "Sentinel Island" Drop (2023): Our very first attempt at a sub-orbital 
+  capsule drop test. It was supposed to be uncrewed, but a Ground Ops technician 
+  named Ramesh had sneaked inside to take a nap. Upon reentry, the capsule got 
+  caught in an unexpected jet stream and landed smack in the middle of North 
+  Sentinel Island in the Andamans. We couldn't retrieve it. We are reasonably 
+  sure the Sentinelese now worship Ramesh as a sky god in a spacesuit. 
+  HR has marked his status as "On Permanent Deputation."
+
+• The ISRO "Surprise Security Audit" (2024): To demonstrate the robustness 
+  of government cyber-defenses, our youngest intern accidentally linked our 
+  cafeteria smart-fridge to ISRO's primary staging telemetry server. For 14 
+  tense hours, ISRO's mission control received live temperature updates of our 
+  paneer tikka instead of their cryogenic engine data. Rather than seeing this 
+  as a catastrophic security incident, we view it as a "proactive cross-agency 
+  thermal synchronization." ISRO physically cut the fiberline to our building, 
+  but they now know precisely who to call for world-class IoT refrigeration.
+
+════════════════════════════════════════════════════════════════════
+
+CONTACT
+
+Email: hello@mahakash.space
+Phone: +91-80-ROCKET-1 (not a real number, our marketing team is "working on it")
+Address: Mahakash HQ, 42 Nebula Avenue, Koramangala, Bengaluru - 560095

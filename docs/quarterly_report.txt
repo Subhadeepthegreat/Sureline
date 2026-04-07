@@ -1,0 +1,123 @@
+MAHAKASH SPACE PRIVATE LIMITED — QUARTERLY FINANCIAL REPORT
+Q4 2025 (October – December 2025)
+
+Prepared by: Finance Department (now with TWO whiteboards)
+Classification: Internal — Confidential-ish
+
+════════════════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY
+════════════════════════════════════════════════════════════════════
+
+Q4 2025 was a blockbuster quarter for Mahakash. We launched 3 rockets, 
+deployed 7 satellites, and the chai machine only broke once (a new 
+record for uptime).
+
+Key highlights:
+• Total Revenue: ₹147.3 Crore (up 23% from Q3)
+• Net Profit: ₹18.2 Crore (up from ₹12.5 Crore in Q3)
+• EBITDA Margin: 19.4%
+• Rockets Launched: 3 (all successful, we're on a streak)
+• Samosas Consumed: 14,200 (also up 23%, suspiciously correlated)
+• Employee Count: 82 (net +5 from Q3, -1 intern who "graduated 
+  to a competitor" — we're handling it emotionally)
+
+════════════════════════════════════════════════════════════════════
+REVENUE BREAKDOWN
+════════════════════════════════════════════════════════════════════
+
+Revenue by Product Category:
+• Launch Services (Pushpak Mk-I & II):     ₹72.4 Cr  (49.2%)
+• Satellite Sales (MahaSat-1 & Nano):      ₹38.7 Cr  (26.3%)
+• Services (Akash Shield, Orbit Express):   ₹21.1 Cr  (14.3%)
+• Components (MahaFuel, Ground Stations):   ₹13.8 Cr  (9.4%)
+• Space Suits (Gaganyaan v2):               ₹1.3 Cr   (0.9%)
+
+Revenue by Region:
+• South India (Bengaluru HQ effect):        ₹52.1 Cr  (35.4%)
+• North India:                              ₹28.3 Cr  (19.2%)
+• West India:                               ₹24.6 Cr  (16.7%)
+• East India:                               ₹12.8 Cr  (8.7%)
+• International:                            ₹29.5 Cr  (20.0%)
+
+International revenue grew 40% QoQ, driven by the ESA partnership and 
+our first Japanese client (SpaceBridge Japan). Our marketing team has 
+started adding "going global" to every presentation. We've asked 
+them to stop.
+
+════════════════════════════════════════════════════════════════════
+TOP CLIENTS (by Revenue, Q4 2025)
+════════════════════════════════════════════════════════════════════
+
+1. ISRO                          ₹38.5 Cr  (contract for 2 MahaSat-1 units)
+2. Indian Defence Ministry       ₹25.2 Cr  (classified. no, literally)
+3. Bharti Airtel                 ₹18.7 Cr  (communication satellite lease)
+4. European Space Agency         ₹16.3 Cr  (rideshare + ground station)
+5. Reliance Jio                  ₹12.1 Cr  (StarLink-Desi modules)
+
+ISRO remains our anchor client. Whenever someone in the office panics 
+about revenue targets, Finance points to the ISRO contract and says 
+"relax." This has been effective 9 out of 10 times.
+
+════════════════════════════════════════════════════════════════════
+EXPENSES
+════════════════════════════════════════════════════════════════════
+
+Total Operating Expenses: ₹129.1 Crore
+
+• Salaries & Wages:              ₹32.4 Cr  (25.1%)
+• Fuel & Propellants:            ₹28.7 Cr  (22.2%)
+• Equipment & Machinery:         ₹21.3 Cr  (16.5%)
+• R&D:                           ₹18.9 Cr  (14.6%)
+• Testing & Simulation:          ₹12.1 Cr  (9.4%)
+• Insurance:                      ₹8.4 Cr  (6.5%)
+• Travel:                         ₹3.2 Cr  (2.5%)
+• Software Licenses:              ₹2.1 Cr  (1.6%)
+• Astro-Catering:                 ₹1.4 Cr  (1.1%)
+• Office Supplies:                ₹0.6 Cr  (0.5%)
+
+The Astro-Catering budget is a frequent topic in board meetings. The 
+CFO has tried to cut it three times. Each time, productivity dropped 
+so dramatically that the budget was immediately restored. The samosa 
+economy is real.
+
+════════════════════════════════════════════════════════════════════
+DEPARTMENT PERFORMANCE
+════════════════════════════════════════════════════════════════════
+
+Top performing departments (by revenue contribution):
+1. Rocket Propulsion — Delivered 3 flawless launches. Dept. morale: 
+   through the roof. Through the atmosphere, actually.
+2. Satellite Division — MahaSat-1 production increased to 2 units/month. 
+   Cable management game: still immaculate.
+3. Ground Operations — Zero launch delays attributable to ground issues. 
+   One delay attributable to a stray cow near the launch pad (handled 
+   diplomatically and with appropriate respect for the cow).
+
+Underperforming:
+- Marketing — spent 30% of budget on a LinkedIn campaign that got 
+  200 likes and zero leads. Being "investigated" (internally, with 
+  gentle disappointment).
+
+════════════════════════════════════════════════════════════════════
+OUTLOOK — Q1 2026
+════════════════════════════════════════════════════════════════════
+
+• Pipeline: ₹210 Crore in signed contracts for H1 2026
+• Planned Launches: 4 (including first fully commercial rideshare)
+• New Hires: 12 planned (finally hiring a second person for IT support)
+• R&D Focus: Pushpak Mk-III development (working title: "Mk-III: 
+  This Time it's Interplanetary." Marketing is not allowed to name 
+  things anymore.)
+• Risk: Global satellite component shortage may affect MahaSat-Nano 
+  production. We're stockpiling chips like it's Diwali.
+
+════════════════════════════════════════════════════════════════════
+AUDITOR'S NOTE
+════════════════════════════════════════════════════════════════════
+
+"The financial statements of Mahakash Space Pvt. Ltd. present a true 
+and fair view of the state of affairs. The Astro-Catering line item 
+is the most detailed expense category we have ever audited. The samosa 
+per-unit cost tracking is, frankly, exemplary."
+
+— Deloitte India (probably)

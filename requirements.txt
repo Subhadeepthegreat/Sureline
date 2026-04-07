@@ -1,0 +1,39 @@
+# === Sureline Voice Agent Dependencies ===
+
+# Core framework — includes silero VAD, websocket transport, openai-compat LLM
+# sarvam: Pipecat's SarvamSTTService + SarvamTTSService
+# elevenlabs: ElevenLabs TTS backup
+pipecat-ai[silero,websocket,openai,sarvam,elevenlabs]>=0.0.50
+
+# Sarvam SDK — pin >=0.1.25 for saaras:v3 features (mode, set_prompt)
+# pipecat-ai[sarvam] may pin 0.1.21 which is missing saaras:v3 support
+sarvamai>=0.1.25
+
+# LLM — Local via Ollama (OpenAI-compatible)
+ollama>=0.4.0
+
+# Vector DB for RAG
+chromadb>=0.5.0
+
+# Data handling
+pandas>=2.0.0
+openpyxl>=3.1.0
+sqlalchemy>=2.0.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Logging
+structlog>=24.0.0
+
+# Hardware detection
+psutil>=5.9.0
+GPUtil>=1.4.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+
+# Audio utilities (for local mic/speaker transport)
+sounddevice>=0.4.6
+numpy>=1.24.0

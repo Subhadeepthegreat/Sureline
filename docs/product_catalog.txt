@@ -1,0 +1,162 @@
+MAHAKASH SPACE PRIVATE LIMITED — PRODUCT CATALOG 2025
+"If it flies, we built it. If it doesn't fly, we're still testing it."
+
+════════════════════════════════════════════════════════════════════
+LAUNCH VEHICLES
+════════════════════════════════════════════════════════════════════
+
+PUSHPAK Mk-I — The Original
+Category: Launch Vehicle
+Base Price: ₹12,00,00,000 (₹12 Crore)
+Payload Capacity: 500 kg to LEO
+Status: Active (Generation 1)
+
+Named after the mythical flying chariot, Pushpak Mk-I was our first 
+launch vehicle. Like most first attempts, it was beautiful, ambitious, 
+and had a few "learning opportunities" (industry speak for "we had to 
+chase it across 3 districts"). The Mk-I can deliver small satellites 
+to Low Earth Orbit with a success rate we're now proud enough to 
+actually disclose: 94%.
+
+Best for: Budget-conscious clients who want their satellite in orbit 
+without taking out a second mortgage.
+
+────────────────────────────────────────────────────────────────────
+
+PUSHPAK Mk-II — The Comeback Kid
+Category: Launch Vehicle
+Base Price: ₹18,50,00,000 (₹18.5 Crore)
+Payload Capacity: 1,200 kg to LEO (300 kg to GTO)
+Status: Active (Our Pride & Joy)
+
+The Mk-II is what happens when engineers are given a second chance 
+and enough chai. It features:
+- Reusable first stage (we ACTUALLY get it back now)
+- 3D-printed turbopump components (because we're fancy)
+- Autonomous landing system (nicknamed "Please Work" internally)
+- 98.5% mission success rate
+
+Best for: Clients who need serious payload capacity and enjoy watching 
+a rocket land itself on a barge in the Bay of Bengal.
+
+════════════════════════════════════════════════════════════════════
+SATELLITES
+════════════════════════════════════════════════════════════════════
+
+MAHASAT-1 — The Flagship
+Category: Communication Satellite
+Base Price: ₹4,50,00,000 (₹4.5 Crore)
+Mass: 350 kg
+Design Life: 15 years (warranty voided if hit by space debris)
+
+Our crown jewel. MahaSat-1 provides broadband communication coverage 
+across the Indian subcontinent. Each unit comes with:
+- 24 Ku-band transponders
+- Full Indian coverage footprint
+- A handwritten "good luck" note from the Satellite Division team lead
+
+Currently 4 MahaSat-1 units are in orbit. All of them work. We are 
+as surprised as you are.
+
+────────────────────────────────────────────────────────────────────
+
+MAHASAT-NANO — The Pocket Rocket (of Satellites)
+Category: Nano Satellite
+Base Price: ₹85,00,000 (₹85 Lakh)
+Mass: 12 kg
+Design Life: 5 years
+
+The MahaSat-Nano is so small it was once mistaken for a lunchbox.
+Perfect for earth observation, IoT connectivity, and making your 
+startup pitch deck say "we have a satellite in orbit."
+
+One client literally received it via courier. We now have better 
+packaging.
+
+════════════════════════════════════════════════════════════════════
+SERVICES & SYSTEMS
+════════════════════════════════════════════════════════════════════
+
+AKASH SHIELD — Space Debris Tracking
+Category: Debris Tracking System
+Base Price: ₹1,20,00,000 (₹1.2 Crore)
+Coverage: LEO (200-2000 km altitude)
+
+Tracks over 35,000 pieces of space junk using ground-based radar and 
+our proprietary ML models. Sends alerts like:
+"⚠️ A 1997 Russian rocket stage is approaching your satellite. 
+  ETA: 47 minutes. Maneuver recommended."
+
+The system has prevented 12 collisions to date. Our insurance 
+premiums have dropped 40%. The insurance team cried happy tears.
+
+────────────────────────────────────────────────────────────────────
+
+ORBIT EXPRESS — Rideshare Launch Service
+Category: Rideshare Launch
+Base Price: ₹35,00,000 (₹35 Lakh) per slot
+Max Satellites Per Launch: 16
+
+Think of it as OlaCabs for space. Book a slot, strap your satellite 
+onto our rocket with other passengers, and off you go. Each rideshare 
+launch includes:
+- Dedicated deployment window
+- Post-deployment tracking (for 30 days)
+- A group photo of all satellites before deployment (yes, really)
+
+────────────────────────────────────────────────────────────────────
+
+STARLINK-DESI — Communication Module
+Category: Communication Module  
+Base Price: ₹67,00,000 (₹67 Lakh)
+
+No relation to that American company. Ours is better. (Legally required 
+to say: "performance claims are aspirational.") A plug-and-play 
+communication module for third-party satellites.
+
+────────────────────────────────────────────────────────────────────
+
+GAGANYAAN SUIT v2 — Space Suit
+Category: Space Suit
+Base Price: ₹25,00,000 (₹25 Lakh) per unit
+
+Designed in collaboration with our Space Suit Design department 
+(the most fashionable department in Indian aerospace). Features:
+- Thermal regulation for -150°C to +120°C
+- Integrated biometric monitoring
+- Surprisingly comfortable for a 12 kg garment
+- Available in 3 colors: Space White, Midnight Blue, and "ISRO Orange"
+- Pockets. Because even astronauts need pockets.
+
+────────────────────────────────────────────────────────────────────
+
+MAHAFUEL BOOSTER — Propulsion Component
+Category: Propulsion Component
+Base Price: ₹1,80,00,000 (₹1.8 Crore)
+
+Our modular solid-fuel booster that can be attached to any compatible 
+launch vehicle for extra thrust. When clients ask "can we go higher?", 
+this is the answer. Each booster adds approximately 2,000 kN of thrust 
+for 120 seconds. That's the force of roughly 50,000 angry auto-
+rickshaws. (Our marketing team insists on this comparison.)
+
+────────────────────────────────────────────────────────────────────
+
+GROUND STATION KIT — Ground Equipment
+Category: Ground Equipment
+Base Price: ₹55,00,000 (₹55 Lakh)
+
+Everything you need to talk to your satellite from the ground:
+- 4.5m parabolic antenna
+- S-band and X-band receivers
+- Control software ("MahaGround" — runs on Linux, we're not barbarians)
+- Installation manual (184 pages, but page 73 is just a motivational 
+  quote from APJ Abdul Kalam)
+
+════════════════════════════════════════════════════════════════════
+
+PRICING NOTE: All prices are base prices in Indian Rupees. Final pricing 
+depends on configuration, volume, and how many samosas the client 
+brings to the negotiation table. We are only slightly joking.
+
+For quotes, contact: sales@mahakash.space
