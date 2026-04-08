@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sureline — Design System Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:        #0d0f14;
+  --bg-surface:     #151821;
+  --bg-elevated:    #1e2230;
+  --text-primary:   #f0ead8;
+  --text-muted:     #6b7094;
+  --accent-orb:     #c47a8a;
+  --lotus-outer:    #8a5a6a;
+  --accent-action:  #c49a2a;
+  --accent-data:    #4a6b65;
+  --accent-terra:   #b86a4e;
+  --accent-frame:   #3d4a6e;
+  --accent-frame-light: #5a6e9e;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; }
+
+.section { padding: 80px 48px; max-width: 1200px; margin: 0 auto; }
+.section-full { padding: 0; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent-frame-light); margin-bottom: 32px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::before { content: ''; display: block; width: 32px; height: 1px; background: var(--accent-frame); }
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--accent-frame) 30%, var(--accent-frame) 70%, transparent); margin: 0 48px; opacity: 0.35; }
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px; text-align: center;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, #1a1428 0%, var(--bg-base) 70%);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233d4a6e' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.hero-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-frame-light); opacity: 0.8; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(56px, 8vw, 96px); font-weight: 300; letter-spacing: -0.01em; line-height: 1; color: var(--text-primary); }
+.hero-title em { font-style: normal; color: var(--accent-orb); }
+.hero-subtitle { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.hero-scroll { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; opacity: 0.5; }
+.hero-scroll-line { width: 1px; height: 32px; background: var(--text-muted); animation: scrollLine 2s ease-in-out infinite; }
+@keyframes scrollLine { 0%,100%{opacity:.3;transform:scaleY(.5);transform-origin:top} 50%{opacity:1;transform:scaleY(1)} }
+
+/* VOICE ORB */
+.orb-screen {
+  min-height: 100vh; display: grid;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, #150d08 0%, var(--bg-base) 65%);
+  position: relative; overflow: hidden;
+  grid-template-rows: auto 1fr auto;
+}
+.orb-chrome-top { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
+.orb-live-badge { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--accent-data); text-transform: uppercase; }
+.orb-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-data); animation: livePulse 2s ease-in-out infinite; }
+@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+.orb-session-info { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; }
+.orb-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 40px 0; }
+.orb-canvas-wrap { position: relative; width: 380px; height: 380px; }
+.lotus-svg { width: 100%; height: 100%; }
+
+.lotus-outer-glow { filter: url(#lotusGlow); animation: idleBreathe 4s ease-in-out infinite; transform-origin: center; }
+.lotus-outer-ring { animation: idleBreathe 4s ease-in-out infinite; transform-origin: center; }
+.lotus-mid-ring { animation: idleBreathe 4s ease-in-out infinite 0.3s; transform-origin: center; }
+.lotus-inner-ring { animation: idleBreathe 4s ease-in-out infinite 0.6s; transform-origin: center; }
+.lotus-center-ring { animation: idleBreathe 4s ease-in-out infinite 0.9s; transform-origin: center; }
+@keyframes idleBreathe { 0%,100% { transform: scale(0.97); opacity: 0.9; } 50% { transform: scale(1.02); opacity: 1; } }
+
+.wave-ring { position: absolute; border-radius: 50%; border: 1px solid; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); pointer-events: none; }
+.wave-ring-1 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.25); }
+.wave-ring-2 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.15); }
+.wave-ring-3 { width: 380px; height: 380px; border-color: rgba(61,74,110,0.3); }
+
+.orb-canvas-wrap[data-state="listening"] .lotus-outer-glow { animation: listenPulse 1.2s ease-in-out infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-outer-ring { animation: processingRotate 8s linear infinite; }
+.orb-canvas-wrap[data-state="speaking"] .lotus-outer-glow { animation: speakBloom 0.6s ease-out forwards, speakPulse 0.4s ease-in-out 0.6s infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-1 { animation: waveExpand 2s ease-out infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-2 { animation: waveExpand 2s ease-out 0.5s infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-3 { animation: waveExpand 2s ease-out 1s infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-1 { animation: waveExpand 1.2s ease-out infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-2 { animation: waveExpand 1.2s ease-out 0.3s infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-3 { animation: waveExpand 1.2s ease-out 0.6s infinite; }
+@keyframes waveExpand { 0% { transform: translate(-50%,-50%) scale(0.55); opacity: 0.7; } 100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
+@keyframes listenPulse { 0%,100% { transform: scale(0.96); } 50% { transform: scale(1.06); } }
+@keyframes speakBloom { 0% { transform: scale(1); } 100% { transform: scale(1.12); } }
+@keyframes speakPulse { 0%,100% { transform: scale(1.1); } 50% { transform: scale(1.15); } }
+@keyframes processingRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.orb-status { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; font-weight: 400; color: var(--text-primary); letter-spacing: 0.02em; text-align: center; min-height: 32px; transition: opacity 0.4s; }
+.orb-transcript { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-muted); text-align: center; max-width: 420px; min-height: 44px; letter-spacing: 0.01em; line-height: 1.7; }
+
+.state-controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 0 0 12px; }
+.state-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 16px; border-radius: 3px; cursor: pointer; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--accent-frame); transition: all 0.2s; }
+.state-btn:hover { color: var(--text-primary); border-color: var(--accent-frame-light); }
+.state-btn.active { background: var(--accent-frame); color: var(--text-primary); border-color: var(--accent-frame-light); }
+
+.orb-chrome-bottom { padding: 16px 32px 28px; display: flex; align-items: center; justify-content: space-between; }
+.orb-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; }
+.orb-end-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 20px; border-radius: 3px; cursor: pointer; background: transparent; color: var(--accent-terra); border: 1px solid rgba(184,106,78,0.4); letter-spacing: 0.05em; transition: all 0.2s; }
+.orb-end-btn:hover { background: rgba(184,106,78,0.1); border-color: var(--accent-terra); }
+
+/* COLOR SECTION */
+.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.swatch-card { border-radius: 4px; overflow: hidden; border: 1px solid rgba(61,74,110,0.2); }
+.swatch-color { height: 80px; }
+.swatch-info { padding: 12px 14px; background: var(--bg-surface); }
+.swatch-name { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.swatch-hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.swatch-role { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
+
+.component-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 24px; }
+.btn-primary { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 3px; cursor: pointer; background: var(--accent-action); color: var(--bg-base); border: none; letter-spacing: 0.04em; transition: all 0.2s; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; padding: 10px 24px; border-radius: 3px; cursor: pointer; background: transparent; color: var(--text-primary); border: 1px solid var(--accent-frame); letter-spacing: 0.04em; transition: all 0.2s; }
+.btn-secondary:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.15); }
+.btn-ghost { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; padding: 10px 24px; border-radius: 3px; cursor: pointer; background: transparent; color: var(--text-muted); border: 1px solid transparent; letter-spacing: 0.04em; transition: all 0.2s; }
+.btn-ghost:hover { color: var(--text-primary); border-color: rgba(107,112,148,0.3); }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; }
+.badge-success { background: rgba(74,107,101,0.2); color: var(--accent-data); border: 1px solid rgba(74,107,101,0.4); }
+.badge-warning { background: rgba(196,154,42,0.15); color: var(--accent-action); border: 1px solid rgba(196,154,42,0.35); }
+.badge-error { background: rgba(184,106,78,0.15); color: var(--accent-terra); border: 1px solid rgba(184,106,78,0.35); }
+.badge-neutral { background: rgba(61,74,110,0.2); color: var(--accent-frame-light); border: 1px solid rgba(61,74,110,0.4); }
+.card { background: var(--bg-surface); border: 1px solid rgba(61,74,110,0.2); border-radius: 4px; padding: 20px 24px; }
+.input-field { width: 100%; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.35); border-radius: 3px; padding: 10px 14px; color: var(--text-primary); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.input-field::placeholder { color: var(--text-muted); opacity: 0.6; }
+.input-field:focus { border-color: var(--accent-frame-light); }
+.input-label { font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+
+/* TYPOGRAPHY */
+.type-specimen { margin-bottom: 40px; border-bottom: 1px solid rgba(61,74,110,0.15); padding-bottom: 40px; }
+.type-specimen:last-child { border-bottom: none; }
+.type-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.type-display { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 64px; font-weight: 300; line-height: 1; letter-spacing: -0.02em; color: var(--text-primary); }
+.type-heading { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 36px; font-weight: 400; line-height: 1.2; color: var(--text-primary); }
+.type-subheading { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; line-height: 1.4; color: var(--text-primary); }
+.type-body { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 400; line-height: 1.7; color: var(--text-primary); max-width: 60ch; }
+.type-small { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; line-height: 1.6; color: var(--text-muted); }
+.type-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 400; line-height: 1.6; color: var(--accent-data); }
+
+/* ADMIN */
+.admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 560px; background: var(--bg-base); border: 1px solid rgba(61,74,110,0.25); border-radius: 6px; overflow: hidden; }
+.admin-sidebar { background: var(--bg-surface); border-right: 1px solid rgba(61,74,110,0.2); padding: 24px 0; }
+.admin-logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(61,74,110,0.15); margin-bottom: 20px; }
+.admin-logo-text { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; font-weight: 400; color: var(--text-primary); }
+.admin-logo-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+.nav-group { margin-bottom: 8px; }
+.nav-group-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); padding: 0 20px 6px; opacity: 0.6; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--text-primary); background: rgba(61,74,110,0.1); }
+.nav-item.active { color: var(--accent-orb); border-left-color: var(--accent-orb); background: rgba(196,122,138,0.08); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink: 0; }
+.admin-main { padding: 32px; overflow: auto; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.admin-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; font-style: italic; color: var(--text-primary); }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.2); border-radius: 4px; padding: 16px 18px; }
+.stat-val { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 500; color: var(--text-primary); line-height: 1; }
+.stat-label { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.04em; }
+.stat-delta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-data); margin-top: 4px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); text-align: left; padding: 0 12px 10px; border-bottom: 1px solid rgba(61,74,110,0.2); }
+.data-table td { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-primary); padding: 12px; border-bottom: 1px solid rgba(61,74,110,0.1); vertical-align: middle; }
+.data-table td.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(61,74,110,0.06); }
+
+/* DATA SETUP */
+.upload-zone { border: 1.5px dashed rgba(61,74,110,0.5); border-radius: 4px; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(21,24,33,0.5); }
+.upload-zone:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.06); }
+.upload-icon { font-size: 28px; opacity: 0.6; }
+.upload-text { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-muted); }
+.upload-text strong { color: var(--accent-action); }
+.upload-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; }
+.file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.file-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.2); border-radius: 3px; }
+.file-icon { width: 28px; height: 28px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.file-icon-sql { background: rgba(74,107,101,0.2); color: var(--accent-data); }
+.file-icon-xlsx { background: rgba(196,154,42,0.15); color: var(--accent-action); }
+.file-icon-pdf { background: rgba(184,106,78,0.15); color: var(--accent-terra); }
+.file-name { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-primary); flex: 1; }
+.file-size { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.file-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; }
+.file-status.ready { color: var(--accent-data); }
+.file-status.processing { color: var(--accent-action); }
+
+/* CALL HISTORY */
+.call-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-chip { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border-radius: 2px; cursor: pointer; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid rgba(61,74,110,0.3); transition: all 0.15s; }
+.filter-chip.active { background: var(--bg-elevated); color: var(--accent-orb); border-color: rgba(196,122,138,0.4); }
+.filter-chip:hover:not(.active) { color: var(--text-primary); border-color: var(--accent-frame); }
+
+/* ONBOARDING */
+.onboard-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 500px; border: 1px solid rgba(61,74,110,0.25); border-radius: 6px; overflow: hidden; }
+.onboard-left { background: radial-gradient(ellipse at 30% 50%, #1a0f22 0%, #0d0f14 70%); padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; }
+.onboard-left-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 40px; font-weight: 300; color: var(--text-primary); line-height: 1.1; margin-bottom: 16px; }
+.onboard-left-sub { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-muted); line-height: 1.7; max-width: 28ch; }
+.onboard-step-list { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+.onboard-step { display: flex; align-items: center; gap: 14px; }
+.onboard-step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; flex-shrink: 0; }
+.onboard-step-num.done { background: rgba(74,107,101,0.2); border: 1px solid var(--accent-data); color: var(--accent-data); }
+.onboard-step-num.active { background: rgba(196,122,138,0.15); border: 1px solid var(--accent-orb); color: var(--accent-orb); }
+.onboard-step-num.pending { background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.3); color: var(--text-muted); }
+.onboard-step-text { font-family: 'DM Sans', sans-serif; font-size: 13px; }
+.onboard-step-text.active { color: var(--text-primary); }
+.onboard-step-text.done { color: var(--text-muted); text-decoration: line-through; opacity: 0.6; }
+.onboard-step-text.pending { color: var(--text-muted); opacity: 0.5; }
+.onboard-right { background: var(--bg-surface); padding: 40px 36px; border-left: 1px solid rgba(61,74,110,0.2); }
+.onboard-form-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.onboard-form-sub { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.form-group { margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.select-field { width: 100%; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.35); border-radius: 3px; padding: 10px 14px; color: var(--text-primary); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; cursor: pointer; appearance: none; }
+.onboard-progress { display: flex; gap: 4px; margin-bottom: 28px; }
+.progress-dot { height: 3px; border-radius: 2px; flex: 1; }
+.progress-dot.done { background: var(--accent-data); }
+.progress-dot.active { background: var(--accent-orb); }
+.progress-dot.pending { background: rgba(61,74,110,0.3); }
+
+/* NAV */
+.page-nav { position: sticky; top: 0; z-index: 100; background: rgba(13,15,20,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(61,74,110,0.2); padding: 12px 48px; display: flex; align-items: center; justify-content: space-between; }
+.page-nav-logo { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: var(--text-primary); letter-spacing: 0.02em; }
+.page-nav-links { display: flex; gap: 4px; }
+.page-nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 14px; border-radius: 2px; color: var(--text-muted); text-decoration: none; cursor: pointer; transition: all 0.15s; }
+.page-nav-link:hover { color: var(--text-primary); background: rgba(61,74,110,0.12); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+h2 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 36px; font-weight: 300; color: var(--text-primary); margin-bottom: 8px; line-height: 1.2; }
+h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 16px; }
+p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
+
+@media (max-width: 768px) {
+  .section { padding: 48px 24px; }
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+  .onboard-layout { grid-template-columns: 1fr; }
+  .onboard-left { display: none; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .orb-canvas-wrap { width: 280px; height: 280px; }
+  .wave-ring-1, .wave-ring-2, .wave-ring-3 { width: 280px; height: 280px; }
+  .page-nav { padding: 12px 24px; }
+  .page-nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <div class="page-nav-logo">Sureline</div>
+  <div class="page-nav-links">
+    <a class="page-nav-link" onclick="document.getElementById('orb').scrollIntoView({behavior:'smooth'})">Voice Orb</a>
+    <a class="page-nav-link" onclick="document.getElementById('colors').scrollIntoView({behavior:'smooth'})">Colors</a>
+    <a class="page-nav-link" onclick="document.getElementById('type').scrollIntoView({behavior:'smooth'})">Typography</a>
+    <a class="page-nav-link" onclick="document.getElementById('admin').scrollIntoView({behavior:'smooth'})">Admin</a>
+    <a class="page-nav-link" onclick="document.getElementById('data').scrollIntoView({behavior:'smooth'})">Data Setup</a>
+    <a class="page-nav-link" onclick="document.getElementById('calls').scrollIntoView({behavior:'smooth'})">Call History</a>
+    <a class="page-nav-link" onclick="document.getElementById('onboard').scrollIntoView({behavior:'smooth'})">Onboarding</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Design System Preview — April 2026</div>
+  <div class="hero-title"><em>Sureline</em></div>
+  <div class="hero-subtitle">Inspired by Tradition &nbsp;&middot;&nbsp; Powered by Voice</div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="orb" class="section-full">
+  <div class="orb-screen">
+    <div class="orb-chrome-top">
+      <div class="orb-live-badge">
+        <div class="orb-live-dot"></div>
+        Live Session
+      </div>
+      <div class="orb-session-info" id="sessionTimer">00:02:14 &nbsp;&middot;&nbsp; HDFC Bank Demo</div>
+    </div>
+
+    <div class="orb-center">
+      <div class="orb-canvas-wrap" data-state="idle" id="orbWrap">
+        <div class="wave-ring wave-ring-1"></div>
+        <div class="wave-ring wave-ring-2"></div>
+        <div class="wave-ring wave-ring-3"></div>
+
+        <svg class="lotus-svg" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="lotusGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c87040" stop-opacity="0.40"/>
+              <stop offset="45%" stop-color="#a05020" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#e8b840"/>
+              <stop offset="60%" stop-color="#c49a2a"/>
+              <stop offset="100%" stop-color="#8a6a1a"/>
+            </radialGradient>
+            <!-- Petal gradients: base=dark, tip=light, objectBoundingBox so rotation-safe -->
+            <linearGradient id="gradOuter" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#7a3828" stop-opacity="0.96"/>
+              <stop offset="100%" stop-color="#d08058" stop-opacity="0.52"/>
+            </linearGradient>
+            <linearGradient id="gradMid" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#9a4e38" stop-opacity="0.93"/>
+              <stop offset="100%" stop-color="#e09070" stop-opacity="0.58"/>
+            </linearGradient>
+            <linearGradient id="gradInner" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#b86a4e" stop-opacity="0.94"/>
+              <stop offset="100%" stop-color="#eeaa88" stop-opacity="0.6"/>
+            </linearGradient>
+            <linearGradient id="gradCenterPetals" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#c47a5a" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#f8c0b0" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+
+          <circle cx="0" cy="0" r="170" fill="url(#bgGlow)"/>
+          <!-- Alpona geometry — chalk-white, very low opacity, grounds the orb -->
+          <g>
+            <circle cx="0" cy="0" r="170" fill="none" stroke="#dcd5c5" stroke-width="0.4" stroke-opacity="0.055"/>
+            <circle cx="0" cy="0" r="154" fill="none" stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.045" stroke-dasharray="3 6"/>
+            <circle cx="0" cy="0" r="114" fill="none" stroke="#dcd5c5" stroke-width="0.35" stroke-opacity="0.06"/>
+            <circle cx="0" cy="0" r="78"  fill="none" stroke="#c9a070" stroke-width="0.3" stroke-opacity="0.14"/>
+          </g>
+          <!-- 8-fold tracery lines -->
+          <g stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.042">
+            <line x1="0" y1="-178" x2="0" y2="178"/>
+            <line x1="-178" y1="0" x2="178" y2="0"/>
+            <line x1="-126" y1="-126" x2="126" y2="126"/>
+            <line x1="126" y1="-126" x2="-126" y2="126"/>
+          </g>
+
+          <g class="lotus-outer-ring" opacity="0.72"><g id="outerPetals"></g></g>
+          <g class="lotus-mid-ring" opacity="0.84"><g id="midPetals"></g></g>
+          <g class="lotus-inner-ring" opacity="0.92"><g id="innerPetals"></g></g>
+          <g class="lotus-center-ring" opacity="0.95"><g id="centerPetals"></g></g>
+
+          <g opacity="0.38">
+            <circle cx="0" cy="0" r="70" fill="none" stroke="#c47a8a" stroke-width="0.4" stroke-opacity="0.45"/>
+            <circle cx="0" cy="0" r="67" fill="none" stroke="#c9a070" stroke-width="0.25" stroke-opacity="0.38" stroke-dasharray="2 4"/>
+          </g>
+
+          <g id="veins" opacity="0.25"></g>
+
+          <g class="lotus-outer-glow" filter="url(#lotusGlow)">
+            <circle cx="0" cy="0" r="24" fill="url(#centerGrad)" opacity="0.9"/>
+            <circle cx="0" cy="0" r="18" fill="#e8b840" opacity="0.7"/>
+            <circle cx="0" cy="0" r="10" fill="#f5cc50" opacity="0.9"/>
+            <circle cx="0" cy="0" r="4" fill="#fff8e0" opacity="0.95"/>
+            <circle cx="0" cy="-14" r="2" fill="#c49a2a" opacity="0.8"/>
+            <circle cx="12.1" cy="7" r="2" fill="#c49a2a" opacity="0.8"/>
+            <circle cx="-12.1" cy="7" r="2" fill="#c49a2a" opacity="0.8"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="orb-status" id="orbStatus">At rest</div>
+      <div class="orb-transcript" id="orbTranscript">Sureline is ready. Begin speaking to activate the session.</div>
+
+      <div class="state-controls">
+        <button class="state-btn active" onclick="setState('idle',this)">Idle</button>
+        <button class="state-btn" onclick="setState('listening',this)">Listening</button>
+        <button class="state-btn" onclick="setState('processing',this)">Processing</button>
+        <button class="state-btn" onclick="setState('speaking',this)">Speaking</button>
+        <button class="state-btn" onclick="setState('error',this)">Error</button>
+      </div>
+    </div>
+
+    <div class="orb-chrome-bottom">
+      <div class="orb-meta">Latency: <span style="color:var(--accent-data)">1.24s</span> &nbsp;&middot;&nbsp; Model: Gemini Flash &nbsp;&middot;&nbsp; STT: Groq Whisper</div>
+      <button class="orb-end-btn">End Session</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="colors" class="section">
+  <div class="section-label">Color System</div>
+  <h2>Natural pigment palette</h2>
+  <p>Earth-derived, not screen-born. These colors read as handcrafted against the dark background.</p>
+
+  <div class="palette-grid" style="margin-bottom:40px">
+    <div class="swatch-card"><div class="swatch-color" style="background:#0d0f14"></div><div class="swatch-info"><div class="swatch-name">Night Ground</div><div class="swatch-hex">#0d0f14</div><div class="swatch-role">bg-base</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#151821"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#151821</div><div class="swatch-role">cards, panels</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#1e2230"></div><div class="swatch-info"><div class="swatch-name">Elevated</div><div class="swatch-hex">#1e2230</div><div class="swatch-role">modals, dropdowns</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#f0ead8"></div><div class="swatch-info"><div class="swatch-name">Parchment</div><div class="swatch-hex">#f0ead8</div><div class="swatch-role">text-primary</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#6b7094"></div><div class="swatch-info"><div class="swatch-name">Indigo Mist</div><div class="swatch-hex">#6b7094</div><div class="swatch-role">text-muted</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#c47a8a"></div><div class="swatch-info"><div class="swatch-name">Lotus Pink (पद्म)</div><div class="swatch-hex">#c47a8a</div><div class="swatch-role">accent-orb</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#c49a2a"></div><div class="swatch-info"><div class="swatch-name">Turmeric (हल्दी)</div><div class="swatch-hex">#c49a2a</div><div class="swatch-role">accent-action — CTAs</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#4a6b65"></div><div class="swatch-info"><div class="swatch-name">Leaf Green (पत्ता)</div><div class="swatch-hex">#4a6b65</div><div class="swatch-role">accent-data — live</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#b86a4e"></div><div class="swatch-info"><div class="swatch-name">Terracotta (नेरुआ)</div><div class="swatch-hex">#b86a4e</div><div class="swatch-role">accent-terra — warn</div></div></div>
+    <div class="swatch-card"><div class="swatch-color" style="background:#3d4a6e"></div><div class="swatch-info"><div class="swatch-name">Indigo (नील)</div><div class="swatch-hex">#3d4a6e</div><div class="swatch-role">accent-frame — borders</div></div></div>
+  </div>
+
+  <h3>Components</h3>
+  <div class="component-row">
+    <button class="btn-primary">Connect Data Source</button>
+    <button class="btn-secondary">Configure Agent</button>
+    <button class="btn-ghost">Cancel</button>
+  </div>
+  <div class="component-row">
+    <span class="badge badge-success"><span>&#9679;</span> Live</span>
+    <span class="badge badge-warning"><span>&#9676;</span> Processing</span>
+    <span class="badge badge-error"><span>&#9650;</span> Timeout</span>
+    <span class="badge badge-neutral"><span>&#9678;</span> Idle</span>
+  </div>
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card">
+      <div class="section-label" style="margin-bottom:16px">Input Fields</div>
+      <div class="form-group"><label class="input-label">Database Host</label><input class="input-field" type="text" placeholder="postgres://internal.example.com:5432"></div>
+      <div class="form-group"><label class="input-label">Schema Name</label><input class="input-field" type="text" value="customer_data"></div>
+      <button class="btn-primary" style="width:100%">Test Connection</button>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:16px">Alert States</div>
+      <div style="background:rgba(74,107,101,0.12);border:1px solid rgba(74,107,101,0.3);border-radius:3px;padding:12px 16px;margin-bottom:10px;font-size:13px;color:var(--accent-data)">&#10003; &nbsp; Connection established. 3 tables indexed.</div>
+      <div style="background:rgba(196,154,42,0.1);border:1px solid rgba(196,154,42,0.3);border-radius:3px;padding:12px 16px;margin-bottom:10px;font-size:13px;color:var(--accent-action)">&#8635; &nbsp; Embedding documents... 47 / 120 chunks</div>
+      <div style="background:rgba(184,106,78,0.1);border:1px solid rgba(184,106,78,0.3);border-radius:3px;padding:12px 16px;font-size:13px;color:var(--accent-terra)">&#9888; &nbsp; Latency spike detected &mdash; 3.2s avg</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="type" class="section">
+  <div class="section-label">Typography</div>
+  <h2>Three-font system</h2>
+  <p>Cormorant Garamond carries the soul. DM Sans does the work. JetBrains Mono earns trust in data.</p>
+  <div class="type-specimen">
+    <div class="type-meta">Cormorant Garamond Italic &mdash; Display / Hero / Headings</div>
+    <div class="type-display">Voice that knows your data</div>
+    <div class="type-heading" style="margin-top:16px">Sacred geometry made operational</div>
+    <div class="type-subheading" style="margin-top:12px">At rest, the lotus breathes. When you speak, it blooms.</div>
+  </div>
+  <div class="type-specimen">
+    <div class="type-meta">DM Sans &mdash; Body / UI / Labels</div>
+    <div class="type-body">Sureline converts client speech to live database queries in under 2 seconds, using the Pipecat streaming pipeline. Enterprise clients call a phone number, ask about their account, and receive spoken answers without waiting for a human agent.</div>
+    <div class="type-small" style="margin-top:10px">Session ID: SRL-2026-04-07-0042 &nbsp;&middot;&nbsp; Duration: 3m 22s &nbsp;&middot;&nbsp; Queries resolved: 4</div>
+  </div>
+  <div class="type-specimen">
+    <div class="type-meta">JetBrains Mono &mdash; Data / Tables / Code / Metrics</div>
+    <div class="type-mono">latency_p50: 1.24s &nbsp;&nbsp; latency_p95: 1.89s &nbsp;&nbsp; queries_ok: 847 &nbsp;&nbsp; errors: 3</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.8">
+      SELECT customer_name, last_payment_date, outstanding_balance<br>
+      FROM accounts WHERE account_id = :account_id<br>
+      LIMIT 1;
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="admin" class="section">
+  <div class="section-label">Admin Panel Mockup</div>
+  <h2>Dashboard</h2>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="admin-logo">
+        <div class="admin-logo-text">Sureline</div>
+        <div class="admin-logo-sub">Admin Console</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Monitor</div>
+        <div class="nav-item active"><div class="nav-dot"></div> Dashboard</div>
+        <div class="nav-item"><div class="nav-dot"></div> Live Sessions</div>
+        <div class="nav-item"><div class="nav-dot"></div> Call History</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Configure</div>
+        <div class="nav-item"><div class="nav-dot"></div> Data Sources</div>
+        <div class="nav-item"><div class="nav-dot"></div> Agent Settings</div>
+        <div class="nav-item"><div class="nav-dot"></div> Voice &amp; TTS</div>
+        <div class="nav-item"><div class="nav-dot"></div> Telephony</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">System</div>
+        <div class="nav-item"><div class="nav-dot"></div> API Keys</div>
+        <div class="nav-item"><div class="nav-dot"></div> Users</div>
+      </div>
+    </div>
+    <div class="admin-main">
+      <div class="admin-header">
+        <div class="admin-title">Good afternoon</div>
+        <span class="badge badge-success"><span>&#9679;</span> 2 Active Sessions</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-val">847</div><div class="stat-label">Queries Today</div><div class="stat-delta">&#8593; 12% vs yesterday</div></div>
+        <div class="stat-card"><div class="stat-val">1.24s</div><div class="stat-label">Avg Latency</div><div class="stat-delta" style="color:var(--accent-action)">&#8593; 0.1s vs target</div></div>
+        <div class="stat-card"><div class="stat-val">91.4%</div><div class="stat-label">Query Success</div><div class="stat-delta">&#8593; 3.2% this week</div></div>
+        <div class="stat-card"><div class="stat-val">&#8377;0.82</div><div class="stat-label">Cost / Interaction</div><div class="stat-delta">&#8595; 8% vs last week</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(61,74,110,0.2);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:13px;font-weight:500">Recent Sessions</div>
+          <button class="btn-ghost" style="padding:4px 12px;font-size:12px">View all</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Session</th><th>Client</th><th>Duration</th><th>Queries</th><th>Latency p95</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">SRL-0047</td><td>HDFC Bank Demo</td><td class="mono">3m 22s</td><td class="mono">4</td><td class="mono">1.89s</td><td><span class="badge badge-success" style="font-size:10px">Completed</span></td></tr>
+            <tr><td class="mono">SRL-0046</td><td>Infosys HR Pilot</td><td class="mono">7m 41s</td><td class="mono">9</td><td class="mono">1.42s</td><td><span class="badge badge-success" style="font-size:10px">Completed</span></td></tr>
+            <tr><td class="mono">SRL-0045</td><td>Reliance Retail</td><td class="mono">2m 05s</td><td class="mono">2</td><td class="mono" style="color:var(--accent-terra)">3.21s</td><td><span class="badge badge-error" style="font-size:10px">Timeout</span></td></tr>
+            <tr><td class="mono">SRL-0044</td><td>TCS Accounts</td><td class="mono">11m 18s</td><td class="mono">14</td><td class="mono">1.31s</td><td><span class="badge badge-success" style="font-size:10px">Completed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="data" class="section">
+  <div class="section-label">Data Source Setup</div>
+  <h2>Connect your data</h2>
+  <p>Databases, spreadsheets, and documents &mdash; all queryable by voice.</p>
+  <div class="grid-2">
+    <div>
+      <h3>Upload Documents</h3>
+      <div class="upload-zone">
+        <div class="upload-icon">&#8679;</div>
+        <div class="upload-text">Drop files here or <strong>browse</strong></div>
+        <div class="upload-hint">PDF &middot; XLSX &middot; CSV &middot; DOCX &middot; up to 50MB each</div>
+      </div>
+      <div class="file-list">
+        <div class="file-item"><div class="file-icon file-icon-sql">&#x2B21;</div><div class="file-name">customer_accounts.sql</div><div class="file-size">2.4 MB</div><div class="file-status ready">Indexed</div></div>
+        <div class="file-item"><div class="file-icon file-icon-xlsx">&#x229E;</div><div class="file-name">Q1_sales_report.xlsx</div><div class="file-size">890 KB</div><div class="file-status ready">Indexed</div></div>
+        <div class="file-item"><div class="file-icon file-icon-pdf">&#x2594;</div><div class="file-name">product_catalog_2026.pdf</div><div class="file-size">4.1 MB</div><div class="file-status processing">Embedding...</div></div>
+      </div>
+    </div>
+    <div>
+      <h3>Live Database</h3>
+      <div class="card">
+        <div class="form-group"><label class="input-label">Connection Type</label><select class="select-field"><option>PostgreSQL</option><option>MySQL</option><option>SQL Server</option><option>BigQuery</option></select></div>
+        <div class="form-group"><label class="input-label">Host / Connection String</label><input class="input-field" type="text" placeholder="postgres://host:5432/db"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="input-label">Username</label><input class="input-field" type="text" placeholder="sureline_ro"></div>
+          <div class="form-group"><label class="input-label">Password</label><input class="input-field" type="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div>
+        </div>
+        <div class="form-group"><label class="input-label">Allowed Tables</label><input class="input-field" type="text" placeholder="accounts, orders, products"></div>
+        <button class="btn-primary" style="width:100%">Test &amp; Connect</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="calls" class="section">
+  <div class="section-label">Call History</div>
+  <h2>Session log</h2>
+  <div class="call-filters">
+    <div class="filter-chip active">All</div>
+    <div class="filter-chip">Completed</div>
+    <div class="filter-chip">Errors</div>
+    <div class="filter-chip">High Latency</div>
+    <div class="filter-chip">Today</div>
+    <div class="filter-chip">This Week</div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table">
+      <thead><tr><th>Time</th><th>Session ID</th><th>Caller</th><th>Queries</th><th>Duration</th><th>Avg Latency</th><th>Cost</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="mono" style="font-size:11px">14:32:07</td><td class="mono">SRL-0047</td><td>HDFC Bank Demo</td><td class="mono">4</td><td class="mono">3m 22s</td><td class="mono">1.24s</td><td class="mono" style="color:var(--accent-data)">&#8377;0.72</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+        <tr><td class="mono" style="font-size:11px">13:58:43</td><td class="mono">SRL-0046</td><td>Infosys HR Pilot</td><td class="mono">9</td><td class="mono">7m 41s</td><td class="mono">1.42s</td><td class="mono" style="color:var(--accent-data)">&#8377;1.84</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+        <tr><td class="mono" style="font-size:11px">13:21:15</td><td class="mono">SRL-0045</td><td>Reliance Retail</td><td class="mono">2</td><td class="mono">2m 05s</td><td class="mono" style="color:var(--accent-terra)">3.21s</td><td class="mono">&#8377;0.41</td><td><span class="badge badge-error" style="font-size:10px">Timeout</span></td></tr>
+        <tr><td class="mono" style="font-size:11px">12:44:31</td><td class="mono">SRL-0044</td><td>TCS Accounts</td><td class="mono">14</td><td class="mono">11m 18s</td><td class="mono">1.31s</td><td class="mono" style="color:var(--accent-data)">&#8377;2.87</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+        <tr><td class="mono" style="font-size:11px">11:02:58</td><td class="mono">SRL-0043</td><td>Wipro Demo</td><td class="mono">6</td><td class="mono">5m 12s</td><td class="mono">1.58s</td><td class="mono" style="color:var(--accent-data)">&#8377;1.12</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="onboard" class="section">
+  <div class="section-label">Onboarding Wizard</div>
+  <h2>New deployment</h2>
+  <div class="onboard-layout">
+    <div class="onboard-left">
+      <div class="onboard-left-title">Set up a new client deployment</div>
+      <div class="onboard-left-sub">Connect your data, configure the agent, and go live in under 20 minutes.</div>
+      <div class="onboard-step-list">
+        <div class="onboard-step"><div class="onboard-step-num done">&#10003;</div><div class="onboard-step-text done">Client profile</div></div>
+        <div class="onboard-step"><div class="onboard-step-num active">2</div><div class="onboard-step-text active">Data sources</div></div>
+        <div class="onboard-step"><div class="onboard-step-num pending">3</div><div class="onboard-step-text pending">Agent configuration</div></div>
+        <div class="onboard-step"><div class="onboard-step-num pending">4</div><div class="onboard-step-text pending">Voice &amp; telephony</div></div>
+        <div class="onboard-step"><div class="onboard-step-num pending">5</div><div class="onboard-step-text pending">Test call</div></div>
+      </div>
+    </div>
+    <div class="onboard-right">
+      <div class="onboard-progress">
+        <div class="progress-dot done"></div>
+        <div class="progress-dot active"></div>
+        <div class="progress-dot pending"></div>
+        <div class="progress-dot pending"></div>
+        <div class="progress-dot pending"></div>
+      </div>
+      <div class="onboard-form-title">Connect data sources</div>
+      <div class="onboard-form-sub">Step 2 of 5 &mdash; Choose what Sureline can query for this client</div>
+      <div class="form-group"><label class="input-label">Deployment Name</label><input class="input-field" type="text" value="HDFC Bank &mdash; Account Enquiries"></div>
+      <div class="form-group"><label class="input-label">Primary Language</label><select class="select-field"><option>English (India)</option><option>Hindi</option><option>Hinglish (Auto-detect)</option><option>Telugu</option><option>Tamil</option></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="input-label">STT Provider</label><select class="select-field"><option>Groq Whisper</option><option>Azure Speech</option><option>AssemblyAI</option></select></div>
+        <div class="form-group"><label class="input-label">TTS Provider</label><select class="select-field"><option>ElevenLabs</option><option>Azure TTS</option><option>Deepgram Aura</option></select></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn-secondary" style="flex:1">&#8592; Back</button>
+        <button class="btn-primary" style="flex:2">Continue: Connect Database &#8594;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div style="padding:32px 48px;display:flex;align-items:center;justify-content:space-between;opacity:0.4">
+  <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--text-primary)">Sureline</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Design System Preview &mdash; /design-consultation</div>
+</div>
+
+<script>
+// Build lotus petals — teardrop paths, warm earth palette only
+(function(){
+  var ns = 'http://www.w3.org/2000/svg';
+  // Teardrop bezier: base at (0,0), tip pointing up at (0,-len). Wide near base, tapers to point.
+  function teardropPath(hw, len) {
+    var h1 = len * 0.22, h2 = len * 0.70;
+    return 'M 0,0 C '+hw+','+(-h1.toFixed(1))+' '+(hw*0.55).toFixed(1)+','+(-h2.toFixed(1))+' 0,'+(-len)+
+           ' C '+(-hw*0.55).toFixed(1)+','+(-h2.toFixed(1))+' '+(-hw)+','+(-h1.toFixed(1))+' 0,0';
+  }
+  // orbitR = distance from center to petal base; hw = half-width; len = petal length outward
+  function addPetals(id, count, orbitR, hw, len, gradId, offset) {
+    var g = document.getElementById(id);
+    var d = teardropPath(hw, len);
+    for(var i=0;i<count;i++){
+      var p = document.createElementNS(ns,'path');
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'url(#'+gradId+')');
+      p.setAttribute('transform','rotate('+(i*(360/count)+offset)+') translate(0,'+(-orbitR)+')');
+      g.appendChild(p);
+    }
+  }
+  // Outer ring: dried-rose, 8 petals — spans r=60 to r=130
+  addPetals('outerPetals',  8, 60, 22, 70, 'gradOuter',        0);
+  // Mid ring: lotus pink, 8 petals, offset 22.5° for interleave — spans r=43 to r=97
+  addPetals('midPetals',    8, 43, 17, 54, 'gradMid',          22.5);
+  // Inner ring: terracotta, 6 petals — spans r=28 to r=66
+  addPetals('innerPetals',  6, 28, 13, 38, 'gradInner',        0);
+  // Center ring: inner warm, 6 petals, offset 30° — spans r=16 to r=40
+  addPetals('centerPetals', 6, 16,  9, 24, 'gradCenterPetals', 30);
+  // Subtle gold vein tracery — 8-fold, very low opacity
+  var vg = document.getElementById('veins');
+  for(var i=0;i<8;i++){
+    var l = document.createElementNS(ns,'line');
+    l.setAttribute('x1','0'); l.setAttribute('y1','0');
+    l.setAttribute('x2','0'); l.setAttribute('y2','-130');
+    l.setAttribute('stroke','#c9a070'); l.setAttribute('stroke-width','0.5');
+    l.setAttribute('stroke-opacity','0.18');
+    l.setAttribute('transform','rotate('+(i*45)+' 0 0)');
+    vg.appendChild(l);
+  }
+})();
+
+// State machine
+const states = {
+  idle:       { status: 'At rest', tx: 'Sureline is ready. Begin speaking to activate the session.' },
+  listening:  { status: 'Listening\u2026', tx: '\u201cWhat was my last payment amount for account 4872?\u201d' },
+  processing: { status: 'Querying database\u2026', tx: 'Running SQL against customer_accounts \u2014 847ms' },
+  speaking:   { status: 'Speaking', tx: 'Your last payment of \u20b912,500 was received on March 28th, 2026.' },
+  error:      { status: 'Connection timeout', tx: 'Latency exceeded 3s threshold. Please retry or check data source.' }
+};
+function setState(s, btn) {
+  const wrap = document.getElementById('orbWrap');
+  const statusEl = document.getElementById('orbStatus');
+  const txEl = document.getElementById('orbTranscript');
+  wrap.dataset.state = s;
+  statusEl.textContent = states[s].status;
+  txEl.textContent = states[s].tx;
+  statusEl.style.color = s==='error'?'var(--accent-terra)':s==='speaking'?'var(--accent-orb)':'var(--text-primary)';
+  wrap.querySelector('.lotus-svg').style.filter = s==='error'?'saturate(0.3) brightness(0.65)':'';
+  document.querySelectorAll('.state-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+// Session timer
+let secs=134;
+setInterval(()=>{
+  secs++;
+  const m=String(Math.floor(secs/60)).padStart(2,'0');
+  const s=String(secs%60).padStart(2,'0');
+  const el=document.getElementById('sessionTimer');
+  if(el) el.innerHTML='00:'+m+':'+s+' &nbsp;&middot;&nbsp; HDFC Bank Demo';
+},1000);
+</script>
+</body>
+</html>
