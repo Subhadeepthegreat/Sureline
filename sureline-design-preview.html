@@ -83,7 +83,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM 
 .wave-ring { position: absolute; border-radius: 50%; border: 1px solid; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); pointer-events: none; }
 .wave-ring-1 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.25); }
 .wave-ring-2 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.15); }
-.wave-ring-3 { width: 380px; height: 380px; border-color: rgba(61,74,110,0.3); }
+.wave-ring-3 { width: 380px; height: 380px; border-color: rgba(100,40,20,0.22); }
 
 .orb-canvas-wrap[data-state="listening"] .lotus-outer-glow { animation: listenPulse 1.2s ease-in-out infinite; }
 .orb-canvas-wrap[data-state="processing"] .lotus-outer-ring { animation: processingRotate 8s linear infinite; }
@@ -243,10 +243,55 @@ h2 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 36
 h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 16px; }
 p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
 
+/* LOGIN */
+.login-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; border: 1px solid rgba(61,74,110,0.25); border-radius: 6px; overflow: hidden; }
+.login-left { background: radial-gradient(ellipse at 40% 60%, #1a0f18 0%, #0d0f14 70%); padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; }
+.login-lotus-mark { margin-bottom: 24px; opacity: 0.88; }
+.login-brand { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 48px; font-weight: 300; color: var(--text-primary); line-height: 1; margin-bottom: 8px; }
+.login-tagline { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-frame-light); margin-bottom: 16px; }
+.login-copy { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-muted); line-height: 1.7; max-width: 26ch; margin-bottom: 32px; }
+.login-clients { display: flex; flex-wrap: wrap; gap: 8px; }
+.login-client-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--text-muted); padding: 4px 10px; border: 1px solid rgba(61,74,110,0.3); border-radius: 2px; opacity: 0.55; }
+.login-right { background: var(--bg-surface); padding: 48px 40px; border-left: 1px solid rgba(61,74,110,0.2); display: flex; flex-direction: column; justify-content: center; }
+.login-form-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--text-primary); margin-bottom: 6px; }
+.login-form-sub { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.btn-sso { width: 100%; padding: 11px 20px; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.4); border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); cursor: pointer; transition: all 0.2s; margin-bottom: 20px; }
+.btn-sso:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.12); }
+.btn-sso-glyph { width: 20px; height: 20px; background: #fff; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4285f4; flex-shrink: 0; line-height: 1; }
+.login-divider { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: rgba(61,74,110,0.25); }
+.login-divider span { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.login-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.login-remember { display: flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.login-forgot { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--accent-frame-light); cursor: pointer; text-decoration: none; }
+.login-forgot:hover { color: var(--text-primary); }
+.login-footer { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 20px; }
+.login-footer a { color: var(--accent-orb); cursor: pointer; text-decoration: none; }
+
+/* MOBILE BOTTOM NAV */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(21,24,33,0.96); backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(61,74,110,0.25);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  justify-content: space-around;
+}
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 8px; min-width: 44px; min-height: 44px; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+}
+.mobile-nav-item.active { color: var(--accent-orb); }
+.mobile-nav-item.active .mobile-nav-icon { opacity: 1; }
+.mobile-nav-icon { font-size: 16px; opacity: 0.55; }
+
 @media (max-width: 768px) {
   .section { padding: 48px 24px; }
   .admin-layout { grid-template-columns: 1fr; }
   .admin-sidebar { display: none; }
+  .admin-main { padding-bottom: 72px; } /* clear bottom nav */
   .onboard-layout { grid-template-columns: 1fr; }
   .onboard-left { display: none; }
   .stat-grid { grid-template-columns: repeat(2,1fr); }
@@ -256,10 +301,31 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
   .wave-ring-1, .wave-ring-2, .wave-ring-3 { width: 280px; height: 280px; }
   .page-nav { padding: 12px 24px; }
   .page-nav-links { display: none; }
+  .mobile-bottom-nav { display: flex; }
+  .orb-end-btn { min-height: 44px; } /* touch target */
+  .login-layout { grid-template-columns: 1fr; }
+  .login-left { display: none; }
+  .login-right { padding: 40px 24px; }
 }
 </style>
 </head>
 <body>
+
+<!-- Mobile bottom nav — appears on ≤768px, replaces hidden admin sidebar -->
+<nav class="mobile-bottom-nav" id="mobileNav">
+  <div class="mobile-nav-item active" onclick="mobileNavTo('admin',this)">
+    <span class="mobile-nav-icon">⊞</span><span>Monitor</span>
+  </div>
+  <div class="mobile-nav-item" onclick="mobileNavTo('orb',this)">
+    <span class="mobile-nav-icon">◎</span><span>Agent</span>
+  </div>
+  <div class="mobile-nav-item" onclick="mobileNavTo('data',this)">
+    <span class="mobile-nav-icon">⬡</span><span>Data</span>
+  </div>
+  <div class="mobile-nav-item" onclick="mobileNavTo('onboard',this)">
+    <span class="mobile-nav-icon">⊕</span><span>Setup</span>
+  </div>
+</nav>
 
 <nav class="page-nav">
   <div class="page-nav-logo">Sureline</div>
@@ -271,6 +337,7 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
     <a class="page-nav-link" onclick="document.getElementById('data').scrollIntoView({behavior:'smooth'})">Data Setup</a>
     <a class="page-nav-link" onclick="document.getElementById('calls').scrollIntoView({behavior:'smooth'})">Call History</a>
     <a class="page-nav-link" onclick="document.getElementById('onboard').scrollIntoView({behavior:'smooth'})">Onboarding</a>
+    <a class="page-nav-link" onclick="document.getElementById('login').scrollIntoView({behavior:'smooth'})">Login</a>
   </div>
 </nav>
 
@@ -309,7 +376,7 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
             <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#c87040" stop-opacity="0.40"/>
+              <stop offset="0%" stop-color="#c87040" stop-opacity="0.62"/>
               <stop offset="45%" stop-color="#a05020" stop-opacity="0.18"/>
               <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
             </radialGradient>
@@ -335,27 +402,58 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
               <stop offset="0%" stop-color="#c47a5a" stop-opacity="0.9"/>
               <stop offset="100%" stop-color="#f8c0b0" stop-opacity="0.6"/>
             </linearGradient>
+            <!-- Outer ambient corona — soft terracotta halo beyond main bgGlow -->
+            <radialGradient id="coronaGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c87040" stop-opacity="0.0"/>
+              <stop offset="55%" stop-color="#8a4020" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Outer ray petals — very narrow, warm amber, creates spiky corona -->
+            <linearGradient id="gradRay" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#a05828" stop-opacity="0.82"/>
+              <stop offset="100%" stop-color="#e8a860" stop-opacity="0.12"/>
+            </linearGradient>
+            <!-- Warm drop shadow for petal depth — gives 3D layered feel -->
+            <filter id="petalShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#1a0800" flood-opacity="0.55"/>
+            </filter>
           </defs>
 
+          <!-- Outer soft terracotta corona — wider ambient halo around the whole flower -->
+          <circle cx="0" cy="0" r="195" fill="url(#coronaGlow)"/>
           <circle cx="0" cy="0" r="170" fill="url(#bgGlow)"/>
           <!-- Alpona geometry — chalk-white, very low opacity, grounds the orb -->
           <g>
+            <circle cx="0" cy="0" r="188" fill="none" stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.030" stroke-dasharray="4 9"/>
             <circle cx="0" cy="0" r="170" fill="none" stroke="#dcd5c5" stroke-width="0.4" stroke-opacity="0.055"/>
             <circle cx="0" cy="0" r="154" fill="none" stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.045" stroke-dasharray="3 6"/>
+            <circle cx="0" cy="0" r="133" fill="none" stroke="#dcd5c5" stroke-width="0.25" stroke-opacity="0.038" stroke-dasharray="2 5"/>
             <circle cx="0" cy="0" r="114" fill="none" stroke="#dcd5c5" stroke-width="0.35" stroke-opacity="0.06"/>
+            <circle cx="0" cy="0" r="96"  fill="none" stroke="#c9a070" stroke-width="0.25" stroke-opacity="0.08" stroke-dasharray="1.5 4"/>
             <circle cx="0" cy="0" r="78"  fill="none" stroke="#c9a070" stroke-width="0.3" stroke-opacity="0.14"/>
           </g>
-          <!-- 8-fold tracery lines -->
+          <!-- 8-fold primary tracery lines -->
           <g stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.042">
-            <line x1="0" y1="-178" x2="0" y2="178"/>
-            <line x1="-178" y1="0" x2="178" y2="0"/>
-            <line x1="-126" y1="-126" x2="126" y2="126"/>
-            <line x1="126" y1="-126" x2="-126" y2="126"/>
+            <line x1="0" y1="-188" x2="0" y2="188"/>
+            <line x1="-188" y1="0" x2="188" y2="0"/>
+            <line x1="-133" y1="-133" x2="133" y2="133"/>
+            <line x1="133" y1="-133" x2="-133" y2="133"/>
+          </g>
+          <!-- 16-fold secondary tracery — offset 22.5°, softer -->
+          <g stroke="#dcd5c5" stroke-width="0.22" stroke-opacity="0.024">
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(22.5)"/>
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(45)"/>
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(67.5)"/>
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(112.5)"/>
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(135)"/>
+            <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(157.5)"/>
           </g>
 
-          <g class="lotus-outer-ring" opacity="0.72"><g id="outerPetals"></g></g>
-          <g class="lotus-mid-ring" opacity="0.84"><g id="midPetals"></g></g>
-          <g class="lotus-inner-ring" opacity="0.92"><g id="innerPetals"></g></g>
+          <!-- Outer corona ray ring — very thin pointed petals, wide spread, low opacity -->
+          <g class="lotus-outer-glow" opacity="0.38" filter="url(#petalShadow)"><g id="rayPetals"></g></g>
+          <g class="lotus-outer-ring" opacity="0.72" filter="url(#petalShadow)"><g id="outerPetals"></g></g>
+          <g class="lotus-mid-ring" opacity="0.84" filter="url(#petalShadow)"><g id="midPetals"></g></g>
+          <g class="lotus-inner-ring" opacity="0.92" filter="url(#petalShadow)"><g id="innerPetals"></g></g>
           <g class="lotus-center-ring" opacity="0.95"><g id="centerPetals"></g></g>
 
           <g opacity="0.38">
@@ -637,6 +735,86 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
 </section>
 
 <div class="divider"></div>
+
+<section id="login" class="section">
+  <div class="section-label">Client Login</div>
+  <h2>Authentication</h2>
+  <div class="login-layout">
+    <div class="login-left">
+      <!-- Lotus brand mark — static SVG, simplified from full orb -->
+      <svg class="login-lotus-mark" viewBox="-50 -50 100 100" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lm-bg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c87040" stop-opacity="0.50"/><stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="0" cy="0" r="48" fill="url(#lm-bg)"/>
+        <!-- 8 outer petals -->
+        <g opacity="0.78">
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(0) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(45) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(90) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(135) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(180) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(225) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(270) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(315) translate(0,-16)"/>
+        </g>
+        <!-- 8 mid petals offset 22.5° -->
+        <g opacity="0.88">
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(22.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(67.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(112.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(157.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(202.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(247.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(292.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(337.5) translate(0,-10)"/>
+        </g>
+        <!-- Gold center -->
+        <circle cx="0" cy="0" r="7" fill="#e8b840" opacity="0.9"/>
+        <circle cx="0" cy="0" r="4" fill="#f5cc50" opacity="0.95"/>
+        <circle cx="0" cy="0" r="1.5" fill="#fff8e0"/>
+      </svg>
+      <div class="login-brand">Sureline</div>
+      <div class="login-tagline">Enterprise Voice Agent</div>
+      <div class="login-copy">Your data. Your language.<br>Answered by voice, instantly.</div>
+      <div class="login-clients">
+        <div class="login-client-badge">HDFC Bank</div>
+        <div class="login-client-badge">Infosys</div>
+        <div class="login-client-badge">Reliance Retail</div>
+        <div class="login-client-badge">TCS</div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-form-title">Welcome back</div>
+      <div class="login-form-sub">Sign in to manage your deployment</div>
+      <button class="btn-sso">
+        <span class="btn-sso-glyph">G</span>
+        Continue with Google Workspace
+      </button>
+      <div class="login-divider"><span>or sign in with email</span></div>
+      <div class="form-group">
+        <label class="input-label">Work Email</label>
+        <input class="input-field" type="email" placeholder="you@company.com" value="admin@hdfcbank.com">
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password</label>
+        <input class="input-field" type="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
+      </div>
+      <div class="login-row">
+        <label class="login-remember">
+          <input type="checkbox" checked style="accent-color:var(--accent-orb)"> Remember me
+        </label>
+        <a class="login-forgot">Forgot password?</a>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:12px 20px">Sign in &rarr;</button>
+      <div class="login-footer">
+        New deployment? <a>Contact Sureline sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
 <div style="padding:32px 48px;display:flex;align-items:center;justify-content:space-between;opacity:0.4">
   <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--text-primary)">Sureline</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Design System Preview &mdash; /design-consultation</div>
@@ -664,14 +842,16 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
       g.appendChild(p);
     }
   }
-  // Outer ring: dried-rose, 8 petals — spans r=60 to r=130
-  addPetals('outerPetals',  8, 60, 22, 70, 'gradOuter',        0);
-  // Mid ring: lotus pink, 8 petals, offset 22.5° for interleave — spans r=43 to r=97
-  addPetals('midPetals',    8, 43, 17, 54, 'gradMid',          22.5);
-  // Inner ring: terracotta, 6 petals — spans r=28 to r=66
-  addPetals('innerPetals',  6, 28, 13, 38, 'gradInner',        0);
-  // Center ring: inner warm, 6 petals, offset 30° — spans r=16 to r=40
-  addPetals('centerPetals', 6, 16,  9, 24, 'gradCenterPetals', 30);
+  // Ray corona: 16 very narrow petals, outermost ring — spiky halo like reference
+  addPetals('rayPetals',    16, 98,  7, 42, 'gradRay',          0);
+  // Outer ring: dried-rose, 12 petals — denser, wider (hw +30%) for full-bloom look
+  addPetals('outerPetals',  12, 60, 28, 70, 'gradOuter',        0);
+  // Mid ring: lotus pink, 12 petals, offset 15° for interleave — wider hw
+  addPetals('midPetals',    12, 43, 22, 54, 'gradMid',          15);
+  // Inner ring: terracotta, 8 petals — wider hw
+  addPetals('innerPetals',   8, 28, 17, 38, 'gradInner',        0);
+  // Center ring: inner warm, 6 petals, offset 30° — wider hw
+  addPetals('centerPetals',  6, 16, 12, 24, 'gradCenterPetals', 30);
   // Subtle gold vein tracery — 8-fold, very low opacity
   var vg = document.getElementById('veins');
   for(var i=0;i<8;i++){
@@ -703,6 +883,13 @@ function setState(s, btn) {
   statusEl.style.color = s==='error'?'var(--accent-terra)':s==='speaking'?'var(--accent-orb)':'var(--text-primary)';
   wrap.querySelector('.lotus-svg').style.filter = s==='error'?'saturate(0.3) brightness(0.65)':'';
   document.querySelectorAll('.state-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+// Mobile bottom nav
+function mobileNavTo(id, btn) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
 }
 
