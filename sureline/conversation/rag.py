@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Chunk settings
 CHUNK_SIZE = 500     # characters per chunk
 CHUNK_OVERLAP = 50   # overlap between chunks
-COLLECTION_NAME = "mahakash_docs"
+_DEFAULT_COLLECTION_NAME = "mahakash_docs"
 
 
 def _chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
@@ -43,9 +43,16 @@ class RAGStore:
     financial reports) and retrieves relevant chunks for any query.
     """
 
-    def __init__(self, persist_dir: Optional[Path] = None, docs_dir: Optional[Path] = None):
+    def __init__(
+        self,
+        persist_dir: Optional[Path] = None,
+        docs_dir: Optional[Path] = None,
+        client_id: Optional[str] = None,
+    ):
         self.persist_dir = persist_dir or CHROMA_DIR
         self.docs_dir = docs_dir or DOCS_DIR
+        # Each client gets their own ChromaDB collection — prevents RAG context cross-contamination
+        self._collection_name = f"{client_id}_docs" if client_id else _DEFAULT_COLLECTION_NAME
 
         # ChromaDB with local persistence
         self.client = chromadb.PersistentClient(
@@ -54,13 +61,13 @@ class RAGStore:
         )
 
         self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
+            name=self._collection_name,
             metadata={"hnsw:space": "cosine"},
         )
 
         logger.info(
-            f"RAGStore initialized. Collection '{COLLECTION_NAME}' "
-            f"has {self.collection.count()} chunks."
+            "RAGStore initialized. Collection '%s' has %d chunks.",
+            self._collection_name, self.collection.count(),
         )
 
     def index_documents(self, force_reindex: bool = False) -> int:
@@ -74,9 +81,9 @@ class RAGStore:
             Number of chunks indexed.
         """
         if force_reindex:
-            self.client.delete_collection(COLLECTION_NAME)
+            self.client.delete_collection(self._collection_name)
             self.collection = self.client.get_or_create_collection(
-                name=COLLECTION_NAME,
+                name=self._collection_name,
                 metadata={"hnsw:space": "cosine"},
             )
 

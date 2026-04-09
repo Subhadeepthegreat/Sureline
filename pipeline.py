@@ -42,11 +42,12 @@ from pipecat.services.openai.llm import OpenAILLMService
 
 from sureline.conversation.conversation_engine import ConversationEngine
 from sureline.config import (
-    DB_PATH, OLLAMA_MODEL,
+    DB_PATH, PROJECT_ROOT, OLLAMA_MODEL,
     AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_MODEL,
     OPENAI_API_KEY, OPENAI_MODEL,
     GEMINI_API_KEY, GEMINI_MODEL, GEMINI_BASE_URL,
 )
+from sureline.schema_registry import SchemaRegistry
 from sureline.stt.stt_module import create_stt_service
 from sureline.tts.tts_module import create_tts_service
 
@@ -91,6 +92,38 @@ logging.getLogger("sureline").setLevel(logging.INFO)
 def status(msg: str) -> None:
     """Single-line status visible above all other log noise."""
     print(f"\n>>> {msg}", flush=True)
+
+
+# ─── Client config loader ─────────────────────────────────────────
+
+def load_conversation_engine() -> ConversationEngine:
+    """
+    Load ConversationEngine from SchemaRegistry using CLIENT_ID env var.
+    Falls back to default Mahakash config if CLIENT_ID is not set.
+    """
+    import os
+    from pathlib import Path
+
+    client_id = os.getenv("CLIENT_ID", "mahakash")
+    clients_dir = PROJECT_ROOT / "clients"
+
+    try:
+        registry = SchemaRegistry(clients_dir=clients_dir)
+        config = registry.load(client_id)
+        status(f"[Config     ] Loaded client config: {config.client_name} ({client_id})")
+        db_path = Path(config.database_path) if config.database_path else DB_PATH
+        csv_path = db_path if config.database_type == "csv" else None
+        return ConversationEngine(
+            db_path=db_path if config.database_type == "sqlite" else None,
+            csv_path=csv_path,
+            client_name=config.client_name,
+            company_description=config.company_description,
+            client_id=client_id,
+            filler_phrase=config.filler_phrase,
+        )
+    except FileNotFoundError:
+        status(f"[Config     ] No YAML for '{client_id}' — using defaults (mahakash hardcodes)")
+        return ConversationEngine(db_path=DB_PATH)
 
 
 # ─── Core processor: RAG + SQL context injection ─────────────────
@@ -145,7 +178,8 @@ class SurelineContextProcessor(FrameProcessor):
 
             # Push filler immediately so TTS has something to say while
             # both LLM calls (RAG + SQL) are running in parallel.
-            await self.push_frame(TextFrame(text="Let me check that for you..."))
+            filler = getattr(self.engine, "_filler_phrase", "Let me check that for you...")
+            await self.push_frame(TextFrame(text=filler))
 
             status("[Context    ] RAG + SQL running in parallel...")
 
@@ -154,17 +188,29 @@ class SurelineContextProcessor(FrameProcessor):
             session = self.engine._get_session(session_id)
             session.add_user_message(question)
 
-            rag_result, query_result = await asyncio.gather(
-                asyncio.to_thread(self.engine.rag.get_context_string, question, 3),
-                self.engine.query_engine.query(question),
-                return_exceptions=True,
-            )
+            try:
+                rag_result, query_result = await asyncio.wait_for(
+                    asyncio.gather(
+                        asyncio.to_thread(self.engine.rag.get_context_string, question, 3),
+                        self.engine.query_engine.query(question),
+                        return_exceptions=True,
+                    ),
+                    timeout=8.0,
+                )
+            except asyncio.TimeoutError:
+                status("[Timeout    ] RAG+SQL exceeded 8s — sending fallback.")
+                await self.push_frame(TextFrame(
+                    text="I'm having trouble retrieving the data right now. Please try again in a moment."
+                ))
+                return
 
-            rag_context = (
-                rag_result if not isinstance(rag_result, Exception)
-                else "No document context available."
-            )
+            if isinstance(rag_result, Exception):
+                logger.warning("[RAG        ] RAG context unavailable: %s", rag_result)
+                rag_context = "No document context available."
+            else:
+                rag_context = rag_result
             if isinstance(query_result, Exception):
+                logger.warning("[SQL        ] SQL query failed: %s", query_result)
                 from sureline.query.sandbox import QueryResult as _QR
                 query_result = _QR(success=False, error=str(query_result))
 
@@ -236,7 +282,7 @@ async def terminal_input_loop(task: PipelineTask) -> None:
 # ─── Text mode ───────────────────────────────────────────────────
 
 async def run_text_mode() -> None:
-    engine = ConversationEngine(db_path=DB_PATH)
+    engine = load_conversation_engine()
 
     timing: dict = {}  # shared state for TTFT measurements
     context_processor = SurelineContextProcessor(engine, timing=timing)
@@ -268,7 +314,7 @@ async def run_voice_mode() -> None:
         await run_text_mode()
         return
 
-    engine = ConversationEngine(db_path=DB_PATH)
+    engine = load_conversation_engine()
 
     stt = create_stt_service()
     tts = create_tts_service()
