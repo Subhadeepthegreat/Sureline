@@ -12,9 +12,11 @@ than generating free-form SQL/code text.
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -112,11 +114,12 @@ class QueryEngine:
     def __init__(
         self,
         db_path: Optional[Path] = None,
+        csv_path: Optional[Path] = None,
         client_name: str = "the company",
         company_description: str = "",
     ):
         self.db_path = db_path or DB_PATH
-        self.csv_path = DATA_DIR / "sales.csv"
+        self.csv_path = csv_path or (DATA_DIR / "sales.csv")
         self._client, self._model = create_llm_client()
 
         self._tools = _build_tools(client_name, company_description)
@@ -139,6 +142,11 @@ class QueryEngine:
             f"DATABASE SCHEMA:\n{self._schema}\n"
         )
 
+        # Query result cache: (question_hash, schema_hash) → (QueryResult, cached_at)
+        self._query_cache: dict[tuple[str, str], tuple[QueryResult, datetime]] = {}
+        self._cache_ttl = timedelta(minutes=5)
+        self._schema_hash = hashlib.md5(self._schema.encode()).hexdigest()[:8]
+
         logger.info("QueryEngine initialized (model=%s, client=%s)", self._model, client_name)
 
     async def query(self, question: str) -> QueryResult:
@@ -152,6 +160,16 @@ class QueryEngine:
             QueryResult with the query results or error.
         """
         start_time = time.time()
+
+        # Check cache
+        q_hash = hashlib.md5(question.strip().lower().encode()).hexdigest()[:16]
+        cache_key = (q_hash, self._schema_hash)
+        cached = self._query_cache.get(cache_key)
+        if cached:
+            result, cached_at = cached
+            if datetime.now(timezone.utc) - cached_at < self._cache_ttl:
+                logger.debug("Cache hit for question (hash=%s)", q_hash)
+                return result
 
         try:
             response = await self._client.chat.completions.create(
@@ -194,12 +212,14 @@ class QueryEngine:
 
             elif func_name == "no_data_query_needed":
                 elapsed = (time.time() - start_time) * 1000
-                return QueryResult(
+                result = QueryResult(
                     success=True,
                     data=func_args.get("reason", "This is a general knowledge question."),
                     query_type="none",
                     execution_time_ms=elapsed,
                 )
+                self._query_cache[cache_key] = (result, datetime.now(timezone.utc))
+                return result
 
             else:
                 elapsed = (time.time() - start_time) * 1000
@@ -210,6 +230,13 @@ class QueryEngine:
                 )
 
             result.execution_time_ms = (time.time() - start_time) * 1000
+            if result.success:
+                now = datetime.now(timezone.utc)
+                self._query_cache[cache_key] = (result, now)
+                # Evict expired entries on each write to bound memory growth
+                expired = [k for k, (_, ts) in self._query_cache.items() if now - ts >= self._cache_ttl]
+                for k in expired:
+                    del self._query_cache[k]
             return result
 
         except Exception as e:

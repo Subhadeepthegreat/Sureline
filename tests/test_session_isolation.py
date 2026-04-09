@@ -164,3 +164,75 @@ class TestConversationEngineSessionRegistry:
         # Fetching again by id returns the same populated session
         assert engine._get_session("A").get_history()[0]["content"] == "message from A"
         assert engine._get_session("B").get_history()[0]["content"] == "message from B"
+
+
+# ─── Session TTL cleanup ──────────────────────────────────────────
+
+def _make_engine(tmp_path):
+    import sqlite3
+    import sureline.config as cfg
+    stub_db = tmp_path / "stub.db"
+    sqlite3.connect(str(stub_db)).close()
+
+    import importlib
+    import sys
+    # Ensure fresh import with monkeypatched env
+    for mod in list(sys.modules.keys()):
+        if "conversation_engine" in mod:
+            del sys.modules[mod]
+
+    cfg.AZURE_OPENAI_API_KEY = ""
+    cfg.AZURE_OPENAI_ENDPOINT = ""
+    cfg.OPENAI_API_KEY = "sk-test"
+    cfg.OPENAI_MODEL = "gpt-4o-mini"
+    cfg.GEMINI_API_KEY = ""
+
+    from unittest.mock import patch
+    with patch("sureline.conversation.rag.RAGStore.index_documents"):
+        from sureline.conversation.conversation_engine import ConversationEngine
+        return ConversationEngine(db_path=stub_db)
+
+
+class TestCleanupStaleSessions:
+    def test_evicts_sessions_past_ttl(self, tmp_path):
+        """Sessions older than TTL should be removed."""
+        from datetime import datetime, timedelta, timezone
+
+        engine = _make_engine(tmp_path)
+        engine._get_session("old-caller")
+        engine._get_session("new-caller")
+
+        # Manually age the "old-caller" session past TTL
+        mem, _ = engine.sessions["old-caller"]
+        old_time = datetime.now(timezone.utc) - timedelta(minutes=60)
+        engine.sessions["old-caller"] = (mem, old_time)
+
+        evicted = engine.cleanup_stale_sessions(ttl_minutes=30)
+
+        assert evicted == 1
+        assert "old-caller" not in engine.sessions
+        assert "new-caller" in engine.sessions
+
+    def test_keeps_fresh_sessions(self, tmp_path):
+        """Sessions younger than TTL should not be evicted."""
+        engine = _make_engine(tmp_path)
+        engine._get_session("fresh-caller")
+
+        evicted = engine.cleanup_stale_sessions(ttl_minutes=30)
+
+        assert evicted == 0
+        assert "fresh-caller" in engine.sessions
+
+    def test_returns_eviction_count(self, tmp_path):
+        """cleanup_stale_sessions returns how many were evicted."""
+        from datetime import datetime, timedelta, timezone
+
+        engine = _make_engine(tmp_path)
+        for sid in ["a", "b", "c"]:
+            engine._get_session(sid)
+            mem, _ = engine.sessions[sid]
+            engine.sessions[sid] = (mem, datetime.now(timezone.utc) - timedelta(minutes=60))
+
+        count = engine.cleanup_stale_sessions(ttl_minutes=30)
+        assert count == 3
+        assert len(engine.sessions) == 0

@@ -26,14 +26,18 @@ from sureline.schema_registry import (
 
 # ─── Helpers ─────────────────────────────────────────────────────
 
-def _make_processor(db_path: Path, field: str = "account_no") -> CallerVerificationProcessor:
+def _make_processor(
+    db_path: Path,
+    field: str = "account_no",
+    table: str = "customers",
+) -> CallerVerificationProcessor:
     config = ClientConfig(
         client_id="test",
         client_name="Test Corp",
         company_description="",
         database_type="sqlite",
         database_path=str(db_path),
-        caller_verification=CallerVerificationConfig(method="pin", field=field),
+        caller_verification=CallerVerificationConfig(method="pin", field=field, table=table),
         fallback=FallbackConfig(
             message="Please hold while we transfer you.",
             action="sip_transfer",
@@ -49,6 +53,30 @@ class TestCallerVerificationInit:
     def test_valid_field_name_accepted(self, db_path: Path):
         proc = _make_processor(db_path, field="account_no")
         assert proc._verify_field == "account_no"
+
+    def test_valid_table_name_accepted(self, db_path: Path):
+        proc = _make_processor(db_path, table="employees")
+        assert proc._verify_table == "employees"
+
+    @pytest.mark.parametrize("bad_table", [
+        "cust omers",   # space
+        "1customers",   # starts with digit
+        "cust-omers",   # hyphen
+        "cust;DROP",    # SQL injection
+        "",             # empty
+    ])
+    def test_invalid_table_name_raises_value_error(self, db_path: Path, bad_table: str):
+        config = ClientConfig(
+            client_id="test",
+            client_name="Test Corp",
+            company_description="",
+            database_type="sqlite",
+            database_path=str(db_path),
+            caller_verification=CallerVerificationConfig(method="pin", field="account_no", table=bad_table),
+            fallback=FallbackConfig(message="hold", action="sip_transfer", target=""),
+        )
+        with pytest.raises(ValueError, match="table"):
+            CallerVerificationProcessor(config)
 
     @pytest.mark.parametrize("bad_field", [
         "account no",        # space

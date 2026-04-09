@@ -59,6 +59,14 @@ class CallerVerificationProcessor(FrameProcessor):
             )
         self._verify_field = field
 
+        table = client_config.caller_verification.table
+        if not _SAFE_COLUMN_RE.match(table):
+            raise ValueError(
+                f"caller_verification.table '{table}' is not a valid SQL table name. "
+                "Must match ^[a-zA-Z_][a-zA-Z0-9_]*$"
+            )
+        self._verify_table = table
+
     async def process_frame(self, frame, direction=FrameDirection.DOWNSTREAM):
         await super().process_frame(frame, direction)
 
@@ -97,16 +105,15 @@ class CallerVerificationProcessor(FrameProcessor):
         return await asyncio.to_thread(self._check_db, spoken_pin)
 
     def _check_db(self, spoken_pin: str) -> bool:
+        conn = None
         try:
             conn = sqlite3.connect(f"file:{self._db_path}?mode=ro", uri=True)
             cursor = conn.cursor()
             cursor.execute(
-                f"SELECT 1 FROM customers WHERE {self._verify_field} = ? LIMIT 1",
+                f"SELECT 1 FROM {self._verify_table} WHERE {self._verify_field} = ? LIMIT 1",
                 (spoken_pin.strip(),),
             )
-            result = cursor.fetchone()
-            conn.close()
-            return result is not None
+            return cursor.fetchone() is not None
         except sqlite3.OperationalError as exc:
             logger.error(
                 "DB error during caller verification (field=%s): %s",
@@ -114,3 +121,6 @@ class CallerVerificationProcessor(FrameProcessor):
             )
             # DB unreachable — fail safe: deny rather than bypass verification
             return False
+        finally:
+            if conn is not None:
+                conn.close()

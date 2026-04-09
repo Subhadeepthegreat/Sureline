@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from pathlib import Path
 
@@ -21,6 +22,9 @@ from sureline.conversation.rag import RAGStore
 from sureline.conversation.memory import SessionMemory
 
 logger = logging.getLogger(__name__)
+
+# Sessions inactive longer than this are eligible for eviction
+_SESSION_TTL_MINUTES = 30
 
 
 class ConversationEngine:
@@ -37,28 +41,55 @@ class ConversationEngine:
     def __init__(
         self,
         db_path: Optional[Path] = None,
+        csv_path: Optional[Path] = None,
         client_name: str = "the company",
         company_description: str = "",
+        client_id: Optional[str] = None,
+        filler_phrase: str = "Let me check that for you...",
     ):
         self._client, self._model = create_llm_client()
         self._client_name = client_name
+        self._filler_phrase = filler_phrase
 
         self.query_engine = QueryEngine(
             db_path=db_path or DB_PATH,
+            csv_path=csv_path,
             client_name=client_name,
             company_description=company_description,
         )
-        self.rag = RAGStore()
-        self.sessions: dict[str, SessionMemory] = {}
+        self.rag = RAGStore(client_id=client_id)
+        self.sessions: dict[str, tuple[SessionMemory, datetime]] = {}
+        self._session_access_count: int = 0  # triggers periodic TTL sweep
 
         self.rag.index_documents()
 
         logger.info("ConversationEngine initialized (model=%s, client=%s)", self._model, client_name)
 
     def _get_session(self, session_id: str) -> SessionMemory:
+        now = datetime.now(timezone.utc)
         if session_id not in self.sessions:
-            self.sessions[session_id] = SessionMemory(session_id=session_id)
-        return self.sessions[session_id]
+            mem = SessionMemory(session_id=session_id)
+            self.sessions[session_id] = (mem, now)
+        else:
+            mem, _ = self.sessions[session_id]
+            self.sessions[session_id] = (mem, now)  # update last_active
+
+        # Periodically evict stale sessions (every 100 accesses) to bound memory growth
+        self._session_access_count += 1
+        if self._session_access_count % 100 == 0:
+            self.cleanup_stale_sessions()
+
+        return mem
+
+    def cleanup_stale_sessions(self, ttl_minutes: int = _SESSION_TTL_MINUTES) -> int:
+        """Evict sessions inactive longer than ttl_minutes. Returns number evicted."""
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=ttl_minutes)
+        stale = [sid for sid, (_, last) in self.sessions.items() if last < cutoff]
+        for sid in stale:
+            del self.sessions[sid]
+        if stale:
+            logger.info("Evicted %d stale sessions (ttl=%dm)", len(stale), ttl_minutes)
+        return len(stale)
 
     async def process_question(
         self,
