@@ -33,6 +33,7 @@ CLIENTS_DIR: Path = PROJECT_ROOT / "clients"
 class CallerVerificationConfig:
     method: str = "pin"          # "pin" | "ani" | "otp"
     field: str = "account_no"   # DB column to verify against
+    table: str = "customers"     # DB table that contains the verification field
 
 
 @dataclass
@@ -71,6 +72,19 @@ class ClientConfig:
     )
     fallback: FallbackConfig = field(default_factory=FallbackConfig)
     golden_test_suite: list[GoldenTest] = field(default_factory=list)
+    # Language for TTS/filler: "en" | "hi" | "hinglish" | "bn"
+    language: str = "en"
+    # Filler phrase spoken while RAG+SQL query runs. Localize per client.
+    filler_phrase: str = "Let me check that for you..."
+
+
+# Default filler phrases by language — used when client YAML doesn't specify filler_phrase
+_DEFAULT_FILLER_PHRASES: dict[str, str] = {
+    "en": "Let me check that for you...",
+    "hi": "एक पल रुकिए, मैं देख रहा हूँ...",
+    "hinglish": "Ek second, main check karta hoon...",
+    "bn": "একটু অপেক্ষা করুন, আমি দেখছি...",
+}
 
 
 class SchemaRegistry:
@@ -179,6 +193,7 @@ class SchemaRegistry:
             caller_verification=CallerVerificationConfig(
                 method=cv_raw.get("method", "pin"),
                 field=cv_raw.get("field", "account_no"),
+                table=cv_raw.get("table", "customers"),
             ),
             fallback=FallbackConfig(
                 message=fb_raw.get("message", "I'll transfer you to our team for that."),
@@ -186,4 +201,26 @@ class SchemaRegistry:
                 target=fb_raw.get("target", ""),
             ),
             golden_test_suite=golden,
+            language=raw.get("language", "en"),
+            filler_phrase=raw.get(
+                "filler_phrase",
+                _DEFAULT_FILLER_PHRASES.get(raw.get("language", "en"), "Let me check that for you..."),
+            ),
         )
+
+    def load_all(self) -> list[ClientConfig]:
+        """Load all YAML configs in the clients dir. Raises ValueError on duplicate client_ids."""
+        if not self._dir.exists():
+            return []
+        configs = []
+        seen_ids: dict[str, Path] = {}
+        for yaml_file in sorted(self._dir.glob("*.yaml")):
+            config = self.load(yaml_file.stem)
+            if config.client_id in seen_ids:
+                raise ValueError(
+                    f"Duplicate client_id '{config.client_id}' found in both "
+                    f"{seen_ids[config.client_id].name} and {yaml_file.name}"
+                )
+            seen_ids[config.client_id] = yaml_file
+            configs.append(config)
+        return configs

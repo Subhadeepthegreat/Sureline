@@ -9,8 +9,9 @@ pipecat-ai[silero,websocket,openai,sarvam,elevenlabs]>=0.0.50
 # pipecat-ai[sarvam] may pin 0.1.21 which is missing saaras:v3 support
 sarvamai>=0.1.25
 
-# LLM — Local via Ollama (OpenAI-compatible)
-ollama>=0.4.0
+# Note: Ollama is no longer a direct dependency — config.py uses the OpenAI-compat endpoint
+# (openai.AsyncOpenAI base_url=OLLAMA_BASE_URL/v1) which requires only the openai package.
+# Install Ollama separately from https://ollama.ai for local dev fallback.
 
 # Vector DB for RAG
 chromadb>=0.5.0

@@ -10,9 +10,13 @@ database:
 
 nl_queries_enabled: true
 
+language: en
+filler_phrase: "Let me check that for you..."
+
 caller_verification:
   method: pin
-  field: id   # employees.id used as PIN in demo mode
+  field: id        # employees.id used as PIN in demo mode
+  table: employees # table containing the verification field
 
 fallback:
   message: "Let me transfer you to our support team."
