@@ -232,3 +232,66 @@ class TestDatabasePathValidation:
         registry = SchemaRegistry(clients_dir=tmp_path)
         config = registry.load("acme-bank")
         assert config.database_path == ""
+
+
+# ─── New fields: table, language, filler_phrase ───────────────────
+
+class TestCallerVerificationTable:
+    def test_table_defaults_to_customers(self, tmp_path: Path):
+        _write_yaml(tmp_path, "acme-bank", MINIMAL_YAML)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert config.caller_verification.table == "customers"
+
+    def test_table_loaded_from_yaml(self, tmp_path: Path):
+        data = {**MINIMAL_YAML, "caller_verification": {"method": "pin", "field": "id", "table": "employees"}}
+        _write_yaml(tmp_path, "acme-bank", data)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert config.caller_verification.table == "employees"
+
+
+class TestLanguageAndFillerPhrase:
+    def test_language_defaults_to_en(self, tmp_path: Path):
+        _write_yaml(tmp_path, "acme-bank", MINIMAL_YAML)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert config.language == "en"
+
+    def test_explicit_filler_phrase_used(self, tmp_path: Path):
+        data = {**MINIMAL_YAML, "language": "en", "filler_phrase": "One moment please..."}
+        _write_yaml(tmp_path, "acme-bank", data)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert config.filler_phrase == "One moment please..."
+
+    def test_hindi_auto_filler_phrase(self, tmp_path: Path):
+        data = {**MINIMAL_YAML, "language": "hi"}
+        _write_yaml(tmp_path, "acme-bank", data)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert "रुकिए" in config.filler_phrase
+
+    def test_bengali_auto_filler_phrase(self, tmp_path: Path):
+        data = {**MINIMAL_YAML, "language": "bn"}
+        _write_yaml(tmp_path, "acme-bank", data)
+        config = SchemaRegistry(clients_dir=tmp_path).load("acme-bank")
+        assert "অপেক্ষা" in config.filler_phrase
+
+
+class TestLoadAll:
+    def test_empty_dir_returns_empty_list(self, tmp_path: Path):
+        configs = SchemaRegistry(clients_dir=tmp_path).load_all()
+        assert configs == []
+
+    def test_loads_multiple_yamls(self, tmp_path: Path):
+        _write_yaml(tmp_path, "acme-bank", MINIMAL_YAML)
+        data2 = {**MINIMAL_YAML, "client_id": "beta-corp", "client_name": "Beta Corp"}
+        _write_yaml(tmp_path, "beta-corp", data2)
+        configs = SchemaRegistry(clients_dir=tmp_path).load_all()
+        assert len(configs) == 2
+        names = {c.client_name for c in configs}
+        assert names == {"ACME Bank", "Beta Corp"}
+
+    def test_duplicate_client_id_raises(self, tmp_path: Path):
+        # Two YAML files with the same client_id value
+        _write_yaml(tmp_path, "acme-bank", MINIMAL_YAML)
+        data2 = {**MINIMAL_YAML, "client_name": "ACME Copy"}  # same client_id "acme-bank"
+        _write_yaml(tmp_path, "acme-copy", data2)
+        with pytest.raises(ValueError, match="Duplicate"):
+            SchemaRegistry(clients_dir=tmp_path).load_all()

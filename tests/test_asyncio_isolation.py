@@ -150,3 +150,66 @@ class TestQueryEngineAsyncQuery:
             result = await coro
 
         assert result.success is True
+
+
+# ─── QueryEngine LRU cache ────────────────────────────────────────
+
+class TestQueryEngineCache:
+    def _make_engine_with_mock(self, db_path):
+        """Return (engine, mock_create) — mock_create.call_count tracks LLM calls."""
+        import json
+
+        fake_response = MagicMock()
+        tool_call = MagicMock()
+        tool_call.function.name = "no_data_query_needed"
+        tool_call.function.arguments = json.dumps({"reason": "test"})
+        fake_response.choices[0].message.tool_calls = [tool_call]
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=fake_response)
+
+        with patch("sureline.query.query_engine.create_llm_client",
+                   return_value=(mock_client, "mock-model")):
+            engine = QueryEngine(db_path=db_path)
+
+        # Swap the internal client so the mock is live after construction
+        engine._client = mock_client
+        return engine, mock_client.chat.completions.create
+
+    @pytest.mark.asyncio
+    async def test_cache_hit_skips_llm_call(self, db_path: Path):
+        """Second identical query should hit cache and NOT call the LLM."""
+        engine, mock_create = self._make_engine_with_mock(db_path)
+
+        r1 = await engine.query("What is the total revenue?")
+        r2 = await engine.query("What is the total revenue?")
+
+        assert r1.success is True
+        assert r2.success is True
+        assert mock_create.call_count == 1  # only one LLM round-trip
+
+    @pytest.mark.asyncio
+    async def test_different_questions_each_call_llm(self, db_path: Path):
+        """Two different questions must each trigger an LLM call."""
+        engine, mock_create = self._make_engine_with_mock(db_path)
+
+        await engine.query("What is the total revenue?")
+        await engine.query("How many customers do we have?")
+
+        assert mock_create.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_expired_cache_re_queries(self, db_path: Path):
+        """After TTL expires, the same question should trigger a fresh LLM call."""
+        from datetime import datetime, timedelta, timezone
+
+        engine, mock_create = self._make_engine_with_mock(db_path)
+        await engine.query("What is the total revenue?")
+
+        # Expire all cache entries
+        for key in list(engine._query_cache.keys()):
+            result, _ = engine._query_cache[key]
+            engine._query_cache[key] = (result, datetime.now(timezone.utc) - timedelta(minutes=10))
+
+        await engine.query("What is the total revenue?")
+        assert mock_create.call_count == 2
