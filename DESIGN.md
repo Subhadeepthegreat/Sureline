@@ -33,7 +33,7 @@
   - `--bg-base: #0d0f14` — ink black (slightly warm, not pure #000)
   - `--bg-surface: #151821` — elevated surface
   - `--bg-elevated: #1e2230` — cards, inputs
-  - `--bg-orb-glow: #150d08` — deep warm near-black for orb radial glow (updated from #1a0f22: warmer, less purple)
+  - `--bg-orb-glow: #1a0f22` — deep warm purple-black for orb radial glow only
 - **Text:**
   - `--text-primary: #f0ead8` — warm parchment white (not cool white)
   - `--text-muted: #6b7094` — muted label color
@@ -86,7 +86,7 @@ The single screen that matters most:
 +--------------------------------------------------+
 ```
 
-- Radial background: `radial-gradient(ellipse 80% 70% at 50% 50%, #150d08 0%, #0d0f14 65%)`
+- Radial background: `radial-gradient(ellipse 70% 70% at 50% 45%, #1a0f22 0%, #0d0f14 65%)`
 - Alpona layer: SVG positioned absolute behind orb, full viewport, very low opacity
 - Orb centered at ~45% height (slightly above center feels more commanding)
 
@@ -132,11 +132,3 @@ What makes the design feel whole vs isolated:
 | 2026-04-07 | Alpona geometry layer required | Orb feels isolated without it — geometry grounds it in Indian visual tradition |
 | 2026-04-07 | No light mode | The product lives in enterprise context — always candlelit |
 | 2026-04-07 | Created by /design-consultation | Based on Voice-animation.md + reference image (ChatGPT Image Apr 4, 2026) |
-| 2026-04-08 | Lotus density: 8→12 outer/mid petals, hw +30% | Sparse 8-petal structure read as daisy not lotus vs reference |
-| 2026-04-08 | feDropShadow on outer/mid/inner rings | Creates 3D petal layering without texture overlay — warm flood-color #1a0800 |
-| 2026-04-08 | 5th ray corona ring (16 petals, orbitR=98) | Spiky outer corona visible in reference, adds intricate geometry |
-| 2026-04-08 | bgGlow center opacity 0.40→0.62 | Reference halo much stronger — was visually weak |
-| 2026-04-08 | Wave ring 3: cool-indigo→warm-dark rgba(100,40,20,0.22) | Ring 3 is shadow ring — should be warm shadow not cool chrome |
-| 2026-04-08 | Mobile bottom nav (Monitor/Agent/Data/Setup) | Admin sidebar hides on mobile; bottom nav replaces navigation |
-| 2026-04-08 | Client login screen designed | Split layout: lotus brand panel left + form right. SSO primary, email/password secondary |
-| 2026-04-08 | bg-orb-glow corrected #1a0f22→#150d08 | #150d08 warmer/darker, matches reference more closely |
