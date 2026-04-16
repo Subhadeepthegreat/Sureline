@@ -6,6 +6,54 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH.MICRO
 
 ---
 
+## [0.2.0.0] - 2026-04-16
+
+### Added
+- **Wiki context store** (`sureline/conversation/wiki.py`) — replaces chunked RAG with
+  pre-curated narrative markdown pages retrieved by keyword scoring. Each page is a
+  self-contained topic unit; retrieval finds the right page and the LLM gets the full story
+- **Full-context RAG mode** — automatically selected when total docs fit under 80,000 chars
+  (~20K tokens), injecting all documents into the system prompt instead of chunking. Best
+  for small, narrative-rich doc sets where chunking destroys coherence
+- **Web UI** (`frontend/index.html`, `web_server.py`) — real-time dashboard at
+  `http://127.0.0.1:8080` showing pipeline state, transcripts, latency, and config. WebSocket
+  broadcaster at `ws://127.0.0.1:8765` pushes events to all connected browser tabs
+- **Mahakash demo wiki** (`docs/wiki/mahakash/`) — 14 curated wiki pages covering company
+  identity, departments, launch vehicles, financials, HR policies, and company legends
+- **Resilient Sarvam STT** — dead-socket circuit breaker with `_reconnecting` flag prevents
+  concurrent reconnect races; rogue frames are silently suppressed until WS reconnects
+- **Cloud LLM detection** (`has_cloud_llm_key()`) — `start.py` skips Ollama setup when any
+  cloud provider key is configured, auto-opens the browser UI after startup
+- **Duration-proportional echo cooldown** — post-TTS mute window scales with utterance
+  length to prevent mic echo from short vs. long responses being treated identically
+- **Social turn classifier** (`_is_social_turn()`) — regex-anchored whitelist skips the
+  SQL/query-engine layer for greetings and chitchat, saving 3–5s per conversational turn
+- `filler_phrase` and `client_name` public properties on `ConversationEngine`
+- 12 new wiki retrieval tests covering `_parse_frontmatter`, `WikiStore.get_context`,
+  force-reindex, multi-word tag scoring, and index-file exclusion
+
+### Changed
+- `MockTTSService` is now a proper `FrameProcessor` — can be inserted in the pipeline
+  instead of only being callable standalone
+- Context store selection is now a factory (`create_context_store()`) that auto-selects
+  WikiStore → FullContextStore → RAGStore based on available data
+- `RAGStore` body-text fallback scoring removed — scoring now relies only on tag matches,
+  preventing long pages from outscoring short, precisely-tagged pages
+- `start.py` startup sequence adapts to cloud vs. local LLM — skips Ollama when cloud key present
+- `pipeline.py` imports updated from `LLMMessagesUpdateFrame` to `LLMMessagesFrame`
+
+### Fixed
+- `_bot_speaking_start` not reset on `InterruptionFrame` — could cause wrong echo cooldown
+  duration on next bot turn after a barge-in
+- Wiki multi-word tag guard `tag not in tokens` was always True (single-word token list can
+  never contain a multi-word phrase) — removed broken guard, multi-word matching now correct
+- `websockets.WebSocketServer` deprecated return type annotation causing DeprecationWarning
+- Directory traversal in `_SilentHandler` — `translate_path()` now validates all requests
+  stay inside `frontend/` before serving
+- `.gitignore` extended to exclude API key files, local Claude config, and pip noise
+
+---
+
 ## [0.1.0.0] - 2026-04-09
 
 ### Added
