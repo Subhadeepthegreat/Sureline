@@ -18,7 +18,7 @@ from pathlib import Path
 
 from sureline.config import DB_PATH, create_llm_client
 from sureline.query.query_engine import QueryEngine
-from sureline.conversation.rag import RAGStore
+from sureline.conversation.rag import create_context_store
 from sureline.conversation.memory import SessionMemory
 
 logger = logging.getLogger(__name__)
@@ -57,13 +57,26 @@ class ConversationEngine:
             client_name=client_name,
             company_description=company_description,
         )
-        self.rag = RAGStore(client_id=client_id)
+        # Auto-selects WikiStore → FullContextStore → RAGStore (in that priority order)
+        self.rag = create_context_store(client_id=client_id)
+        store_type = type(self.rag).__name__
         self.sessions: dict[str, tuple[SessionMemory, datetime]] = {}
         self._session_access_count: int = 0  # triggers periodic TTL sweep
 
         self.rag.index_documents()
 
-        logger.info("ConversationEngine initialized (model=%s, client=%s)", self._model, client_name)
+        logger.info(
+            "ConversationEngine initialized (model=%s, client=%s, store=%s)",
+            self._model, client_name, store_type,
+        )
+
+    @property
+    def filler_phrase(self) -> str:
+        return self._filler_phrase
+
+    @property
+    def client_name(self) -> str:
+        return self._client_name
 
     def _get_session(self, session_id: str) -> SessionMemory:
         now = datetime.now(timezone.utc)
@@ -160,8 +173,15 @@ class ConversationEngine:
     ) -> list[dict]:
         """
         Build the messages array for the streaming LLM in pipeline.py.
-        Called by SurelineContextProcessor to push LLMMessagesUpdateFrame.
+        Called by SurelineContextProcessor to push LLMMessagesFrame.
+
+        Architecture:
+        - System prompt = voice agent rules + full company knowledge (background)
+        - History messages = clean prior Q&A turns
+        - Final user message = current question + live DB data only
+          (docs are NOT repeated here — they're already in the system prompt)
         """
+        # ── Format live data result ───────────────────────────────────────
         if query_result.success and query_result.data:
             if isinstance(query_result.data, str):
                 data_str = query_result.data
@@ -170,37 +190,62 @@ class ConversationEngine:
             else:
                 data_str = str(query_result.data)
         elif not query_result.success:
-            data_str = f"Query failed: {query_result.error}"
+            data_str = f"Data query failed: {query_result.error}"
         else:
-            data_str = "No data results."
+            data_str = "No data results found."
 
+        # ── System prompt: rules + docs as background knowledge ──────────
+        # Docs go here (not in the user message) so the LLM treats them as
+        # standing knowledge, separate from the live conversation.
         system_prompt = (
-            f"You are a voice assistant for {self._client_name}.\n\n"
-            "Generate a SPOKEN response — this will be read aloud by a text-to-speech system.\n\n"
-            "RULES:\n"
-            "1. Be CONCISE — 1 to 3 sentences maximum.\n"
-            "2. Use natural, conversational language (as if speaking to someone).\n"
-            "3. Use Indian number formatting when applicable (lakhs, crores).\n"
-            "4. Do NOT use markdown, bullet points, tables, or any formatting.\n"
-            "5. Do NOT say 'according to the data' or 'based on the query' — just give the answer naturally.\n"
-            "6. If data shows no results, say it naturally: 'I couldn't find any data for that.'\n"
-            "7. Be slightly warm and professional.\n"
-            "8. If the data is surprising, you can be subtly amused."
+            f"You are Sureline, a voice assistant who speaks AS {self._client_name} — "
+            "as if you are the company's knowledgeable, warm, and slightly witty spokesperson.\n\n"
+            "You are mid-conversation. The user already knows who you are. "
+            "Your responses will be read aloud by text-to-speech.\n\n"
+
+            "━━━ CONVERSATION RULES ━━━\n"
+            "1. HISTORY AWARENESS — Read the conversation history carefully. "
+            "NEVER repeat information you already provided in a previous turn. "
+            "If you covered something before, build on it or move forward — do not restart.\n"
+            "2. RESPONSE LENGTH — Match length strictly to what was asked:\n"
+            "   • Short reaction / acknowledgment (e.g. 'it is', 'okay', 'wow') → 1 sentence, warm and brief.\n"
+            "   • Simple factual question → 1-2 sentences.\n"
+            "   • Story / achievement / detail request → full, rich, narrative answer.\n"
+            "   • Follow-up ('tell me more', 'what else') → expand the SAME topic, don't switch.\n"
+            "3. ENDINGS — Never end with generic questions like 'Would you like to know more?' or "
+            "'Isn't that exciting?' — these feel robotic. Either end naturally, or ask something "
+            "SPECIFIC that follows logically from what was just discussed.\n"
+            "4. GROUNDEDNESS — Only speak from the Company Knowledge and Live Data below. "
+            "If neither has the answer, say warmly: 'I don't have that detail right now.' "
+            "NEVER invent facts, numbers, or incidents.\n"
+            "5. VOICE — Conversational, spoken language only. No bullet points, lists, or markdown. "
+            "Use Indian number formatting (lakhs, crores). Speak as the company's voice, never say "
+            "'according to the documents' or 'based on the data'.\n"
+            "6. HUMOUR & WARMTH — The company has a distinct personality. Let it come through "
+            "naturally — don't force it, but don't suppress it either.\n\n"
+
+            f"━━━ COMPANY KNOWLEDGE ━━━\n{rag_context}\n"
         )
 
         messages = [{"role": "system", "content": system_prompt}]
 
+        # ── Inject conversation history (up to last 6 messages) ──────────
+        # Use clean Q&A pairs so the LLM can see what it already covered.
         history = session.get_history()
-        if len(history) > 2:
-            for h in history[-4:-1]:
-                messages.append(h)
+        # history[-1] is the current question (just added in _enrich_and_push)
+        # history[-2] is the last assistant reply, etc.
+        # We include up to 6 messages before the current question.
+        prior = history[:-1]  # exclude current question — it goes in user_msg below
+        for h in prior[-6:]:
+            messages.append(h)
 
-        user_msg = (
-            f'User asked: "{question}"\n\n'
-            f"Company context:\n{rag_context}\n\n"
-            f"Data query result:\n{data_str}\n\n"
-            "Generate a natural spoken response:"
-        )
+        # ── Current turn: question + live DB data ─────────────────────────
+        # Docs are already in system prompt — don't repeat them here.
+        if data_str and data_str not in ("No data results found.", "Data query failed: no_data_query_needed"):
+            user_msg = f"{question}\n\n[Live data: {data_str}]"
+        else:
+            user_msg = question
+
         messages.append({"role": "user", "content": user_msg})
         return messages
 
@@ -210,8 +255,8 @@ class ConversationEngine:
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=messages,
-                temperature=0.4,
-                max_tokens=150,
+                temperature=0.6,
+                max_tokens=400,
             )
             answer = response.choices[0].message.content.strip()
             answer = answer.replace("**", "").replace("*", "")

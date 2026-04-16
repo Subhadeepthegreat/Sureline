@@ -93,6 +93,12 @@ def has_elevenlabs_key() -> bool:
     return bool(ELEVENLABS_API_KEY)
 
 
+def has_cloud_llm_key() -> bool:
+    """Return True if any cloud LLM provider (Azure, OpenAI, Gemini) is configured.
+    False means the pipeline will fall back to local Ollama (dev/trial only)."""
+    return bool(AZURE_OPENAI_API_KEY or OPENAI_API_KEY or GEMINI_API_KEY)
+
+
 def create_llm_client():
     """
     Return an openai.AsyncClient wired to the active LLM provider.
