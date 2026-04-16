@@ -105,7 +105,7 @@ class TestConversationEngineSessionRegistry:
             m.setattr(cfg, "GEMINI_API_KEY", "", raising=True)
 
             from unittest.mock import patch
-            with patch("sureline.conversation.rag.RAGStore.index_documents"):
+            with patch("sureline.conversation.rag.create_context_store"):
                 from sureline.conversation.conversation_engine import ConversationEngine
                 engine = ConversationEngine(db_path=stub_db)
 
@@ -130,7 +130,7 @@ class TestConversationEngineSessionRegistry:
             m.setattr(cfg, "GEMINI_API_KEY", "", raising=True)
 
             from unittest.mock import patch
-            with patch("sureline.conversation.rag.RAGStore.index_documents"):
+            with patch("sureline.conversation.rag.create_context_store"):
                 from sureline.conversation.conversation_engine import ConversationEngine
                 engine = ConversationEngine(db_path=stub_db)
 
@@ -152,7 +152,7 @@ class TestConversationEngineSessionRegistry:
             m.setattr(cfg, "GEMINI_API_KEY", "", raising=True)
 
             from unittest.mock import patch
-            with patch("sureline.conversation.rag.RAGStore.index_documents"):
+            with patch("sureline.conversation.rag.create_context_store"):
                 from sureline.conversation.conversation_engine import ConversationEngine
                 engine = ConversationEngine(db_path=stub_db)
 
@@ -188,7 +188,7 @@ def _make_engine(tmp_path):
     cfg.GEMINI_API_KEY = ""
 
     from unittest.mock import patch
-    with patch("sureline.conversation.rag.RAGStore.index_documents"):
+    with patch("sureline.conversation.rag.create_context_store"):
         from sureline.conversation.conversation_engine import ConversationEngine
         return ConversationEngine(db_path=stub_db)
 
