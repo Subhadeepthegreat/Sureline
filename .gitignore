@@ -19,8 +19,10 @@ build/
 *.swp
 *.swo
 
-# Data (generated)
+# Data (generated — keep seed scripts but not binary DBs)
 data/mahakash.db
+data/devlogs.db
+*.db
 
 # ChromaDB
 chroma_db/
@@ -33,3 +35,16 @@ Thumbs.db
 logs/
 *.log
 .gstack/
+
+# Secrets (never commit)
+gemini-free-api.txt
+*.key
+*.secret
+
+# Local Claude config
+.claude/settings.local.json
+.claude/worktrees/
+.playwright-mcp/
+
+# Noise
+=6.0

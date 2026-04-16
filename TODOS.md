@@ -1,6 +1,6 @@
 # Sureline — Deferred Work
 
-Last updated: 2026-04-08 (from /plan-eng-review)
+Last updated: 2026-04-16 (v0.2.0.0)
 
 ---
 
@@ -15,15 +15,11 @@ the platform first; then Plivo makes it dialable from any phone.
 Reference: pipecat-sarvam-handshake.md has integration notes.
 **Blocked by:** Platform config layer working (Phase 1) + WebRTC Phase 1.5 demo.
 
-### TODO-2: Lotus UI (Demo Surface + Voice Animation)
-**What:** Web page with animated lotus SVG that expands/contracts with voice activity (Web Audio API).
-**Why:** The visual demo makes the technology tangible for prospective clients.
-States: Idle → Listening (grows with voice) → Thinking (gentle rotation) → Speaking (pulses with TTS).
-**Design:** Reference image: `ChatGPT Image Apr 4, 2026, 05_10_49 PM.png` in project root.
-**Effort:** M (CC: ~4 hours) | **Stack:** HTML/CSS/JS or React. WebRTC connects to Python backend.
-**How to start:** `/design-consultation` or `/frontend-design` skill for the lotus animation.
-**Blocked by:** WebRTC transport working (Phase 1.5).
-**Note:** UI doubles as WhatsApp/Discord screen-share surface for remote demos.
+### ~~TODO-2: Lotus UI (Demo Surface + Voice Animation)~~
+**Completed: v0.2.0.0 (2026-04-16)**
+Delivered as `frontend/index.html` + `web_server.py`. Lotus orb animation responds to
+idle/listening/processing/speaking pipeline states via WebSocket at `ws://127.0.0.1:8765`.
+Served at `http://127.0.0.1:8080`, auto-opens on `python start.py`.
 
 ---
 

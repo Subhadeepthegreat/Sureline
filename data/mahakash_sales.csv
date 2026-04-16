@@ -1,0 +1,201 @@
+id,product,client,salesperson,region,amount,sale_date,quarter
+1,MahaFuel Booster,OneWeb India,Manoj Singh,North India,20714676,2024-06-18,Q2 2024
+2,Pushpak Mk-I,Maritime Watch Ltd,Kavita Mukherjee,North India,101203322,2025-06-08,Q2 2025
+3,Orbit Express,European Space Agency,Rajesh Das,East India,3648692,2025-11-13,Q4 2025
+4,MahaSat-Nano,Pixxel,Neha Patel,South India,7666056,2025-06-12,Q2 2025
+5,MahaSat-1,AgriSat Corp,Arun Patel,South India,42555986,2023-05-24,Q2 2023
+6,Orbit Express,Maritime Watch Ltd,Rajesh Das,North India,3807655,2024-09-07,Q3 2024
+7,MahaFuel Booster,Reliance Jio,Kavita Iyer,West India,17297282,2024-08-28,Q3 2024
+8,MahaFuel Booster,Bharti Airtel,Ravi Nair,East India,19187491,2025-02-15,Q1 2025
+9,Pushpak Mk-I,Maritime Watch Ltd,Swati Gupta,West India,115491608,2023-01-01,Q1 2023
+10,Akash Shield,Reliance Jio,Sanjay Rao,East India,13371642,2024-10-21,Q4 2024
+11,Gaganyaan Suit v2,Dhruva Space,Amit Sharma,South India,2511173,2023-12-14,Q4 2023
+12,MahaSat-Nano,Reliance Jio,Tara Mehta,International,7939640,2024-04-26,Q2 2024
+13,Akash Shield,Tata Communications,Shreya Mukherjee,South India,9717241,2024-05-16,Q2 2024
+14,Gaganyaan Suit v2,Maritime Watch Ltd,Tara Nair,East India,2414441,2024-02-03,Q1 2024
+15,StarLink-Desi,Dhruva Space,Gaurav Mukherjee,South India,5755491,2023-01-12,Q1 2023
+16,MahaSat-Nano,SpaceBridge Japan,Rajesh Banerjee,South India,7398014,2025-11-26,Q4 2025
+17,Gaganyaan Suit v2,ISRO,Sanjay Sharma,South India,2917470,2023-09-06,Q3 2023
+18,Gaganyaan Suit v2,Bharti Airtel,Neha Choudhury,International,2987892,2024-10-11,Q4 2024
+19,Gaganyaan Suit v2,Maritime Watch Ltd,Suresh Patel,East India,2830569,2025-07-02,Q3 2025
+20,Pushpak Mk-I,European Space Agency,Priya Singh,East India,108441194,2024-05-21,Q2 2024
+21,Akash Shield,SpaceBridge Japan,Praveen Joshi,East India,12608392,2024-07-16,Q3 2024
+22,Gaganyaan Suit v2,Indian Defence Ministry,Swati Banerjee,South India,2271715,2024-10-16,Q4 2024
+23,MahaFuel Booster,Indian Defence Ministry,Amit Nair,South India,16065082,2023-11-09,Q4 2023
+24,Pushpak Mk-II,Indian Defence Ministry,Arjun Nair,East India,172485222,2025-08-12,Q3 2025
+25,StarLink-Desi,ISRO,Sanjay Rao,East India,6403797,2023-02-10,Q1 2023
+26,Ground Station Kit,Pixxel,Manoj Mehta,North India,6474031,2024-09-03,Q3 2024
+27,StarLink-Desi,Pixxel,Arun Patel,International,7503646,2024-03-27,Q1 2024
+28,Gaganyaan Suit v2,Tata Communications,Asha Gupta,East India,2485641,2025-03-07,Q1 2025
+29,Orbit Express,GlobalVu Defence,Gaurav Mukherjee,South India,3976707,2023-09-19,Q3 2023
+30,Ground Station Kit,AgriSat Corp,Manoj Singh,East India,5702164,2023-02-25,Q1 2023
+31,MahaSat-Nano,GlobalVu Defence,Rajesh Banerjee,South India,9747294,2024-01-08,Q1 2024
+32,MahaSat-1,Reliance Jio,Shreya Gupta,West India,39809885,2024-10-31,Q4 2024
+33,Orbit Express,SpaceBridge Japan,Shreya Gupta,West India,3852813,2025-05-13,Q2 2025
+34,Akash Shield,Indian Defence Ministry,Priya Singh,North India,13195316,2023-04-17,Q2 2023
+35,Orbit Express,Tata Communications,Lakshmi Sharma,North India,3855926,2024-05-21,Q2 2024
+36,Pushpak Mk-II,ISRO,Amit Rao,South India,165652325,2025-08-27,Q3 2025
+37,MahaSat-Nano,Maritime Watch Ltd,Ananya Gupta,East India,9178180,2025-01-25,Q1 2025
+38,Pushpak Mk-I,Maritime Watch Ltd,Divya Banerjee,North India,133334010,2023-12-02,Q4 2023
+39,Akash Shield,Indian Defence Ministry,Pooja Singh,North India,14058658,2025-02-07,Q1 2025
+40,StarLink-Desi,European Space Agency,Shreya Mukherjee,North India,6946822,2024-05-12,Q2 2024
+41,MahaSat-Nano,European Space Agency,Deepa Iyer,International,9538795,2023-03-26,Q1 2023
+42,Orbit Express,AgriSat Corp,Rajesh Banerjee,West India,2896539,2024-11-29,Q4 2024
+43,MahaSat-1,Pixxel,Sanjay Nair,North India,43803421,2025-01-11,Q1 2025
+44,Gaganyaan Suit v2,European Space Agency,Arun Choudhury,East India,2176136,2025-12-04,Q4 2025
+45,Akash Shield,Maritime Watch Ltd,Arun Patel,East India,11831394,2024-07-03,Q3 2024
+46,Orbit Express,Tata Communications,Asha Iyer,West India,4034283,2024-05-14,Q2 2024
+47,Gaganyaan Suit v2,Maritime Watch Ltd,Lakshmi Rao,East India,2336396,2025-10-09,Q4 2025
+48,Orbit Express,Bharti Airtel,Sanjay Nair,South India,3296754,2024-06-13,Q2 2024
+49,Orbit Express,Reliance Jio,Asha Patel,West India,3578107,2025-11-24,Q4 2025
+50,Pushpak Mk-II,Indian Defence Ministry,Gaurav Choudhury,East India,184154760,2024-05-07,Q2 2024
+51,Gaganyaan Suit v2,GlobalVu Defence,Sanjay Nair,East India,2792932,2023-07-10,Q3 2023
+52,Akash Shield,Tata Communications,Gaurav Mukherjee,South India,11069788,2025-01-25,Q1 2025
+53,Gaganyaan Suit v2,AgriSat Corp,Meera Choudhury,West India,2425503,2024-11-08,Q4 2024
+54,Orbit Express,European Space Agency,Nandini Reddy,West India,3229272,2024-04-17,Q2 2024
+55,MahaSat-Nano,European Space Agency,Ravi Nair,West India,7206486,2024-01-15,Q1 2024
+56,Pushpak Mk-II,Tata Communications,Manoj Mehta,West India,201619290,2025-12-10,Q4 2025
+57,Ground Station Kit,Reliance Jio,Neha Nair,South India,5051742,2025-01-09,Q1 2025
+58,Pushpak Mk-I,Reliance Jio,Rohit Banerjee,International,102075982,2023-04-04,Q2 2023
+59,MahaSat-1,AgriSat Corp,Nikhil Mehta,South India,47481653,2025-10-02,Q4 2025
+60,MahaSat-Nano,ISRO,Neha Patel,West India,8395949,2025-06-21,Q2 2025
+61,Orbit Express,Bharti Airtel,Sanjay Reddy,West India,4117489,2025-09-05,Q3 2025
+62,MahaSat-Nano,Indian Defence Ministry,Gaurav Mukherjee,East India,7051879,2023-04-20,Q2 2023
+63,Pushpak Mk-I,Bharti Airtel,Swati Gupta,West India,100088683,2024-05-23,Q2 2024
+64,MahaSat-Nano,AgriSat Corp,Arjun Nair,International,8826831,2024-04-07,Q2 2024
+65,MahaFuel Booster,Pixxel,Nandini Joshi,East India,16540942,2025-05-28,Q2 2025
+66,Akash Shield,Maritime Watch Ltd,Amit Rao,North India,12526228,2023-07-23,Q3 2023
+67,Pushpak Mk-II,GlobalVu Defence,Ananya Gupta,West India,196871682,2023-11-18,Q4 2023
+68,Pushpak Mk-II,Bharti Airtel,Kavita Khan,North India,159583413,2025-04-16,Q2 2025
+69,Gaganyaan Suit v2,European Space Agency,Asha Patel,East India,2291259,2024-04-19,Q2 2024
+70,Akash Shield,European Space Agency,Swati Banerjee,East India,9941662,2024-04-23,Q2 2024
+71,Akash Shield,SpaceBridge Japan,Priya Khan,South India,11640667,2024-04-05,Q2 2024
+72,Pushpak Mk-I,Reliance Jio,Suresh Choudhury,North India,98862625,2024-09-21,Q3 2024
+73,Ground Station Kit,European Space Agency,Swati Gupta,West India,5366137,2025-08-17,Q3 2025
+74,Akash Shield,European Space Agency,Gaurav Mukherjee,West India,12002266,2025-10-08,Q4 2025
+75,Gaganyaan Suit v2,Indian Defence Ministry,Asha Patel,North India,2889422,2024-10-22,Q4 2024
+76,Ground Station Kit,Reliance Jio,Manoj Singh,North India,4903633,2023-02-12,Q1 2023
+77,Akash Shield,Maritime Watch Ltd,Suresh Khan,South India,11858403,2025-06-24,Q2 2025
+78,Akash Shield,Bharti Airtel,Pooja Singh,East India,12646966,2025-10-04,Q4 2025
+79,MahaSat-Nano,Dhruva Space,Kavita Rao,East India,7933248,2023-08-03,Q3 2023
+80,Pushpak Mk-I,OneWeb India,Kavita Iyer,East India,109834454,2025-03-31,Q1 2025
+81,MahaFuel Booster,ISRO,Nandini Reddy,North India,16664523,2024-10-24,Q4 2024
+82,MahaSat-Nano,SpaceBridge Japan,Gaurav Mukherjee,International,9604752,2023-01-03,Q1 2023
+83,MahaFuel Booster,Dhruva Space,Kavita Iyer,North India,15750594,2025-01-10,Q1 2025
+84,Ground Station Kit,SpaceBridge Japan,Tara Rao,East India,6071979,2024-02-21,Q1 2024
+85,Akash Shield,AgriSat Corp,Gaurav Rao,West India,11702957,2025-09-19,Q3 2025
+86,MahaSat-Nano,ISRO,Divya Banerjee,South India,9213261,2024-09-28,Q3 2024
+87,MahaFuel Booster,ISRO,Kavita Khan,East India,15071106,2023-08-21,Q3 2023
+88,Gaganyaan Suit v2,Indian Defence Ministry,Arun Choudhury,East India,2932653,2024-08-20,Q3 2024
+89,MahaFuel Booster,European Space Agency,Asha Gupta,East India,20410012,2025-08-25,Q3 2025
+90,Pushpak Mk-II,Dhruva Space,Kavita Khan,South India,176385364,2025-11-06,Q4 2025
+91,Pushpak Mk-I,Indian Defence Ministry,Nandini Singh,East India,112314011,2025-11-05,Q4 2025
+92,Akash Shield,ISRO,Swati Banerjee,West India,13619884,2025-09-29,Q3 2025
+93,Pushpak Mk-I,Dhruva Space,Arun Patel,East India,112565949,2025-02-11,Q1 2025
+94,Gaganyaan Suit v2,OneWeb India,Ravi Nair,South India,2571797,2024-04-23,Q2 2024
+95,StarLink-Desi,ISRO,Rajesh Das,East India,7250010,2025-02-19,Q1 2025
+96,StarLink-Desi,GlobalVu Defence,Arun Choudhury,East India,7945729,2023-09-16,Q3 2023
+97,MahaFuel Booster,Maritime Watch Ltd,Sanjay Das,North India,20694170,2025-06-20,Q2 2025
+98,MahaSat-Nano,AgriSat Corp,Nandini Reddy,North India,9256309,2025-04-19,Q2 2025
+99,Pushpak Mk-I,Indian Defence Ministry,Priya Singh,West India,112250939,2025-03-25,Q1 2025
+100,MahaSat-Nano,OneWeb India,Arun Patel,East India,10044074,2025-09-26,Q3 2025
+101,MahaFuel Booster,ISRO,Amit Rao,North India,16090345,2024-08-11,Q3 2024
+102,Pushpak Mk-II,European Space Agency,Asha Iyer,East India,220396991,2023-07-25,Q3 2023
+103,Gaganyaan Suit v2,Bharti Airtel,Deepa Iyer,North India,2045990,2023-04-25,Q2 2023
+104,Akash Shield,OneWeb India,Swati Mehta,East India,10298735,2025-12-23,Q4 2025
+105,StarLink-Desi,Maritime Watch Ltd,Neha Reddy,South India,5829185,2025-02-22,Q1 2025
+106,Ground Station Kit,GlobalVu Defence,Gaurav Choudhury,East India,6408223,2023-10-21,Q4 2023
+107,Pushpak Mk-II,Dhruva Space,Priya Iyer,East India,166894176,2023-01-20,Q1 2023
+108,Gaganyaan Suit v2,Reliance Jio,Divya Iyer,South India,2073861,2024-12-08,Q4 2024
+109,Ground Station Kit,Reliance Jio,Rajesh Banerjee,West India,5405038,2024-09-10,Q3 2024
+110,Pushpak Mk-II,Pixxel,Manoj Mehta,North India,165553221,2025-01-05,Q1 2025
+111,Ground Station Kit,Reliance Jio,Nikhil Mehta,North India,6551477,2025-03-21,Q1 2025
+112,Akash Shield,ISRO,Swati Gupta,North India,13970961,2025-10-14,Q4 2025
+113,Akash Shield,SpaceBridge Japan,Karthik Reddy,International,13449273,2024-03-24,Q1 2024
+114,Pushpak Mk-II,Maritime Watch Ltd,Priya Iyer,South India,194490359,2023-03-22,Q1 2023
+115,Akash Shield,SpaceBridge Japan,Amit Sharma,North India,12381954,2023-09-27,Q3 2023
+116,MahaSat-Nano,Reliance Jio,Priya Mukherjee,East India,7397176,2023-09-28,Q3 2023
+117,MahaFuel Booster,OneWeb India,Meera Choudhury,International,20977106,2023-12-03,Q4 2023
+118,Akash Shield,Dhruva Space,Nikhil Mehta,West India,13460316,2025-08-17,Q3 2025
+119,MahaSat-Nano,Bharti Airtel,Ananya Joshi,East India,10088717,2025-01-19,Q1 2025
+120,MahaSat-Nano,SpaceBridge Japan,Priya Das,North India,7699159,2023-09-11,Q3 2023
+121,Gaganyaan Suit v2,OneWeb India,Kavita Mukherjee,International,2381025,2025-01-30,Q1 2025
+122,MahaSat-Nano,GlobalVu Defence,Karthik Reddy,East India,6885083,2024-11-02,Q4 2024
+123,Ground Station Kit,Tata Communications,Lakshmi Sharma,East India,6400652,2024-09-10,Q3 2024
+124,StarLink-Desi,Indian Defence Ministry,Amit Nair,North India,7895980,2024-09-15,Q3 2024
+125,Gaganyaan Suit v2,Indian Defence Ministry,Neha Nair,South India,2887259,2023-10-05,Q4 2023
+126,StarLink-Desi,Dhruva Space,Swati Mehta,International,6483259,2023-11-13,Q4 2023
+127,StarLink-Desi,GlobalVu Defence,Neha Nair,East India,7009947,2024-07-26,Q3 2024
+128,MahaSat-1,European Space Agency,Swati Mehta,South India,43980895,2024-04-28,Q2 2024
+129,Orbit Express,Indian Defence Ministry,Swati Mehta,International,4062374,2025-01-04,Q1 2025
+130,MahaSat-1,Pixxel,Nandini Singh,South India,53427723,2025-07-20,Q3 2025
+131,MahaSat-Nano,GlobalVu Defence,Ananya Gupta,International,10101717,2023-04-14,Q2 2023
+132,Orbit Express,Tata Communications,Gaurav Rao,International,3087287,2024-02-29,Q1 2024
+133,Ground Station Kit,Tata Communications,Karthik Reddy,West India,6103610,2023-01-06,Q1 2023
+134,Akash Shield,Bharti Airtel,Gaurav Rao,International,10803140,2023-12-24,Q4 2023
+135,MahaSat-Nano,GlobalVu Defence,Manoj Singh,South India,6850525,2024-05-02,Q2 2024
+136,Ground Station Kit,OneWeb India,Sunita Sharma,South India,4983808,2023-09-17,Q3 2023
+137,StarLink-Desi,AgriSat Corp,Nikhil Reddy,North India,6636339,2025-01-11,Q1 2025
+138,MahaFuel Booster,Maritime Watch Ltd,Pooja Mehta,East India,18027638,2023-03-30,Q1 2023
+139,MahaFuel Booster,Reliance Jio,Nandini Reddy,North India,14837942,2025-09-07,Q3 2025
+140,StarLink-Desi,Pixxel,Pooja Mehta,East India,7269235,2025-06-27,Q2 2025
+141,MahaSat-Nano,Indian Defence Ministry,Priya Mukherjee,International,7304335,2023-09-16,Q3 2023
+142,Akash Shield,Maritime Watch Ltd,Pooja Singh,International,13018333,2025-02-19,Q1 2025
+143,Ground Station Kit,AgriSat Corp,Nikhil Mehta,East India,5512212,2025-05-31,Q2 2025
+144,MahaSat-Nano,SpaceBridge Japan,Nikhil Reddy,International,9250855,2024-03-16,Q1 2024
+145,StarLink-Desi,Dhruva Space,Karthik Reddy,East India,6268336,2025-07-17,Q3 2025
+146,StarLink-Desi,Pixxel,Neha Nair,West India,6503727,2024-06-06,Q2 2024
+147,Orbit Express,Bharti Airtel,Priya Singh,North India,2927714,2023-06-24,Q2 2023
+148,MahaSat-Nano,Pixxel,Neha Nair,West India,9560015,2023-05-03,Q2 2023
+149,Ground Station Kit,AgriSat Corp,Sanjay Sharma,West India,5874029,2025-04-21,Q2 2025
+150,Orbit Express,GlobalVu Defence,Rajesh Banerjee,North India,4155758,2024-10-01,Q4 2024
+151,Orbit Express,Indian Defence Ministry,Neha Patel,International,3097834,2025-09-14,Q3 2025
+152,Pushpak Mk-II,Indian Defence Ministry,Kavita Rao,International,175199517,2024-07-24,Q3 2024
+153,Ground Station Kit,Tata Communications,Rajesh Banerjee,International,6544002,2023-02-23,Q1 2023
+154,Ground Station Kit,GlobalVu Defence,Asha Gupta,North India,4796915,2024-09-24,Q3 2024
+155,Orbit Express,OneWeb India,Nikhil Patel,South India,4017807,2025-03-31,Q1 2025
+156,MahaSat-Nano,Bharti Airtel,Manoj Singh,North India,9336779,2024-03-16,Q1 2024
+157,StarLink-Desi,Pixxel,Nandini Reddy,West India,5781856,2024-09-30,Q3 2024
+158,Orbit Express,SpaceBridge Japan,Swati Gupta,International,2918939,2023-04-18,Q2 2023
+159,Pushpak Mk-I,Bharti Airtel,Amit Rao,North India,128350498,2024-07-11,Q3 2024
+160,Gaganyaan Suit v2,GlobalVu Defence,Rajesh Banerjee,East India,2607076,2025-04-28,Q2 2025
+161,Akash Shield,Tata Communications,Tara Mehta,North India,11256829,2023-08-16,Q3 2023
+162,Akash Shield,GlobalVu Defence,Priya Khan,East India,12129283,2024-09-23,Q3 2024
+163,MahaSat-1,Tata Communications,Priya Das,International,36986075,2024-02-23,Q1 2024
+164,Akash Shield,Tata Communications,Amit Nair,West India,10989346,2023-09-03,Q3 2023
+165,MahaSat-1,Dhruva Space,Meera Iyer,South India,38325342,2025-12-26,Q4 2025
+166,Pushpak Mk-II,AgriSat Corp,Sanjay Sharma,West India,153333586,2023-03-28,Q1 2023
+167,StarLink-Desi,ISRO,Nandini Reddy,North India,7670454,2025-05-29,Q2 2025
+168,Ground Station Kit,Pixxel,Arjun Nair,West India,4653381,2023-02-12,Q1 2023
+169,Orbit Express,Bharti Airtel,Amit Rao,East India,3964836,2025-01-11,Q1 2025
+170,MahaSat-Nano,Pixxel,Pooja Mehta,South India,8281300,2025-03-31,Q1 2025
+171,MahaFuel Booster,Indian Defence Ministry,Priya Das,West India,19769794,2024-03-29,Q1 2024
+172,Orbit Express,SpaceBridge Japan,Suresh Nair,North India,3514676,2023-08-22,Q3 2023
+173,MahaFuel Booster,AgriSat Corp,Ravi Nair,West India,16927918,2023-10-30,Q4 2023
+174,Pushpak Mk-II,Indian Defence Ministry,Suresh Choudhury,West India,162598113,2023-11-10,Q4 2023
+175,MahaSat-Nano,Bharti Airtel,Tara Rao,East India,9365115,2025-07-08,Q3 2025
+176,Ground Station Kit,GlobalVu Defence,Amit Rao,West India,6301343,2024-10-09,Q4 2024
+177,Pushpak Mk-I,Dhruva Space,Lakshmi Sharma,East India,117225987,2024-09-12,Q3 2024
+178,Akash Shield,Maritime Watch Ltd,Ravi Patel,West India,12035217,2024-09-27,Q3 2024
+179,Gaganyaan Suit v2,Dhruva Space,Nikhil Banerjee,North India,2368737,2024-08-10,Q3 2024
+180,MahaSat-Nano,GlobalVu Defence,Asha Iyer,International,8819871,2025-02-26,Q1 2025
+181,Gaganyaan Suit v2,Maritime Watch Ltd,Kavita Khan,North India,2449733,2024-01-21,Q1 2024
+182,Orbit Express,Maritime Watch Ltd,Priya Singh,International,3011205,2023-05-07,Q2 2023
+183,Gaganyaan Suit v2,Indian Defence Ministry,Swati Choudhury,North India,2504549,2023-12-20,Q4 2023
+184,MahaSat-1,Tata Communications,Amit Sharma,East India,45433233,2023-11-22,Q4 2023
+185,Orbit Express,OneWeb India,Swati Banerjee,East India,3372277,2024-11-23,Q4 2024
+186,Ground Station Kit,ISRO,Sanjay Das,North India,5125319,2025-03-02,Q1 2025
+187,Akash Shield,Reliance Jio,Divya Banerjee,South India,11200137,2023-10-17,Q4 2023
+188,Orbit Express,Reliance Jio,Priya Das,South India,3633057,2023-06-23,Q2 2023
+189,Akash Shield,AgriSat Corp,Shreya Gupta,West India,13503286,2025-12-14,Q4 2025
+190,MahaSat-Nano,GlobalVu Defence,Rajesh Banerjee,International,8030215,2025-01-12,Q1 2025
+191,Akash Shield,Bharti Airtel,Ananya Gupta,West India,14148807,2025-09-22,Q3 2025
+192,Pushpak Mk-II,Tata Communications,Amit Nair,South India,153710216,2023-07-27,Q3 2023
+193,MahaFuel Booster,SpaceBridge Japan,Divya Iyer,International,14671781,2024-11-20,Q4 2024
+194,Ground Station Kit,Bharti Airtel,Asha Patel,East India,4739356,2024-01-06,Q1 2024
+195,Ground Station Kit,SpaceBridge Japan,Suresh Nair,East India,4496123,2025-01-16,Q1 2025
+196,Pushpak Mk-II,Dhruva Space,Lakshmi Rao,West India,203676946,2025-07-08,Q3 2025
+197,Pushpak Mk-II,AgriSat Corp,Gaurav Choudhury,West India,219454151,2025-08-18,Q3 2025
+198,Pushpak Mk-II,OneWeb India,Neha Patel,East India,182164318,2024-07-31,Q3 2024
+199,StarLink-Desi,AgriSat Corp,Meera Choudhury,East India,7949598,2024-02-13,Q1 2024
+200,Ground Station Kit,Bharti Airtel,Priya Iyer,North India,5810593,2025-01-30,Q1 2025
