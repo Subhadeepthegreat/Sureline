@@ -9,7 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-base:        #0d0f14;
+  --bg-base:        #191614;  /* charcoal black — warm, not blue */
   --bg-surface:     #151821;
   --bg-elevated:    #1e2230;
   --text-primary:   #f0ead8;
@@ -64,20 +64,68 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM 
   position: relative; overflow: hidden;
   grid-template-rows: auto 1fr auto;
 }
+/* Full-viewport alpona layer — sits behind everything in the orb screen */
+.alpona-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.alpona-bg svg { width: 100%; height: 100%; display: block; }
+
+/* Border alpona strips — top, bottom, left, right edges of orb screen */
+.alpona-border-top, .alpona-border-bottom {
+  position: absolute; left: 0; right: 0; z-index: 5; pointer-events: none;
+}
+.alpona-border-top { top: 0; height: 72px; }
+.alpona-border-bottom { bottom: 0; height: 80px; }
+.alpona-border-left, .alpona-border-right {
+  position: absolute; top: 0; bottom: 0; z-index: 5; pointer-events: none; width: 52px;
+}
+.alpona-border-left { left: 0; }
+.alpona-border-right { right: 0; }
+.alpona-border-top svg, .alpona-border-bottom svg,
+.alpona-border-left svg, .alpona-border-right svg { width: 100%; height: 100%; display: block; }
+
+/* ── Ripple animation for alpona ring groups ─────────────────────────────── */
+/* Pure scale-breathe only — no rotation. The ripple illusion comes from       */
+/* staggered animation-delay: inner rings lead, outer rings follow, so the     */
+/* expand/contract wave propagates outward like water ripples from the lotus.  */
+/* transform-box: view-box + origin center = scales from (0,0) in SVG space   */
+/* which is the exact lotus center (viewBox is -700 -450 1400 900).            */
+.ripple-ring {
+  transform-box: view-box;
+  transform-origin: center center;
+}
+@keyframes rippleScale {
+  0%   { transform: scale(0.974); opacity: 0.80; }
+  50%  { transform: scale(1.028); opacity: 1.00; }
+  100% { transform: scale(0.974); opacity: 0.80; }
+}
+
+/* Film grain overlay — thin SVG noise tiled over the whole screen */
+.grain-overlay {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px; background-repeat: repeat;
+}
+
 .orb-chrome-top { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
 .orb-live-badge { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--accent-data); text-transform: uppercase; }
 .orb-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-data); animation: livePulse 2s ease-in-out infinite; }
 @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
 .orb-session-info { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; }
-.orb-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 40px 0; }
+.orb-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 40px 0; position: relative; z-index: 4; }
 .orb-canvas-wrap { position: relative; width: 380px; height: 380px; }
 .lotus-svg { width: 100%; height: 100%; }
 
-.lotus-outer-glow { filter: url(#lotusGlow); animation: idleBreathe 4s ease-in-out infinite; transform-origin: center; }
-.lotus-outer-ring { animation: idleBreathe 4s ease-in-out infinite; transform-origin: center; }
-.lotus-mid-ring { animation: idleBreathe 4s ease-in-out infinite 0.3s; transform-origin: center; }
-.lotus-inner-ring { animation: idleBreathe 4s ease-in-out infinite 0.6s; transform-origin: center; }
-.lotus-center-ring { animation: idleBreathe 4s ease-in-out infinite 0.9s; transform-origin: center; }
+/* transform-box: fill-box + transform-origin: center is the most reliable way
+   to rotate SVG <g> elements around their own geometric center.
+   Each petal ring is symmetric around (0,0) in SVG space, so fill-box center
+   resolves to the lotus center — same point for all rings.                   */
+.lotus-outer-glow  { filter: url(#lotusGlow); transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite; }
+.lotus-outer-ring  { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite; }
+.lotus-mid-ring    { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.3s; }
+.lotus-inner-ring  { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.6s; }
+.lotus-center-ring { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.9s; }
 @keyframes idleBreathe { 0%,100% { transform: scale(0.97); opacity: 0.9; } 50% { transform: scale(1.02); opacity: 1; } }
 
 .wave-ring { position: absolute; border-radius: 50%; border: 1px solid; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); pointer-events: none; }
@@ -86,7 +134,14 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM 
 .wave-ring-3 { width: 380px; height: 380px; border-color: rgba(100,40,20,0.22); }
 
 .orb-canvas-wrap[data-state="listening"] .lotus-outer-glow { animation: listenPulse 1.2s ease-in-out infinite; }
-.orb-canvas-wrap[data-state="processing"] .lotus-outer-ring { animation: processingRotate 8s linear infinite; }
+/* Processing: all rings spin in place at the same speed — like a top.
+   Same period = they never separate or drift apart, the lotus holds its shape.
+   Alternating CW/CCW between adjacent layers gives the gyroscopic layered look. */
+.orb-canvas-wrap[data-state="processing"] .lotus-outer-glow  { animation: procRotateCW  9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-outer-ring  { animation: procRotateCCW 9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-mid-ring    { animation: procRotateCW  9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-inner-ring  { animation: procRotateCCW 9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-center-ring { animation: procRotateCW  9s linear infinite; }
 .orb-canvas-wrap[data-state="speaking"] .lotus-outer-glow { animation: speakBloom 0.6s ease-out forwards, speakPulse 0.4s ease-in-out 0.6s infinite; }
 .orb-canvas-wrap[data-state="listening"] .wave-ring-1 { animation: waveExpand 2s ease-out infinite; }
 .orb-canvas-wrap[data-state="listening"] .wave-ring-2 { animation: waveExpand 2s ease-out 0.5s infinite; }
@@ -98,7 +153,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM 
 @keyframes listenPulse { 0%,100% { transform: scale(0.96); } 50% { transform: scale(1.06); } }
 @keyframes speakBloom { 0% { transform: scale(1); } 100% { transform: scale(1.12); } }
 @keyframes speakPulse { 0%,100% { transform: scale(1.1); } 50% { transform: scale(1.15); } }
-@keyframes processingRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes procRotateCW      { from { transform: rotate(0deg);    } to { transform: rotate(360deg);   } }
+@keyframes procRotateCCW     { from { transform: rotate(0deg);    } to { transform: rotate(-360deg);  } }
 
 .orb-status { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; font-weight: 400; color: var(--text-primary); letter-spacing: 0.02em; text-align: center; min-height: 32px; transition: opacity 0.4s; }
 .orb-transcript { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-muted); text-align: center; max-width: 420px; min-height: 44px; letter-spacing: 0.01em; line-height: 1.7; }
@@ -108,7 +164,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: 'DM 
 .state-btn:hover { color: var(--text-primary); border-color: var(--accent-frame-light); }
 .state-btn.active { background: var(--accent-frame); color: var(--text-primary); border-color: var(--accent-frame-light); }
 
-.orb-chrome-bottom { padding: 16px 32px 28px; display: flex; align-items: center; justify-content: space-between; }
+.orb-chrome-bottom { padding: 16px 32px 28px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 4; }
 .orb-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; }
 .orb-end-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 20px; border-radius: 3px; cursor: pointer; background: transparent; color: var(--accent-terra); border: 1px solid rgba(184,106,78,0.4); letter-spacing: 0.05em; transition: all 0.2s; }
 .orb-end-btn:hover { background: rgba(184,106,78,0.1); border-color: var(--accent-terra); }
@@ -355,6 +411,16 @@ p { color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; }
 
 <section id="orb" class="section-full">
   <div class="orb-screen">
+    <!-- Full-viewport alpona layer — chalk patterns behind the lotus -->
+    <div class="alpona-bg" id="alponaBg"></div>
+    <!-- Film grain texture overlay -->
+    <div class="grain-overlay"></div>
+    <!-- Border alpona strips -->
+    <div class="alpona-border-top" id="alponaBorderTop"></div>
+    <div class="alpona-border-bottom" id="alponaBorderBottom"></div>
+    <div class="alpona-border-left" id="alponaBorderLeft"></div>
+    <div class="alpona-border-right" id="alponaBorderRight"></div>
+
     <div class="orb-chrome-top">
       <div class="orb-live-badge">
         <div class="orb-live-dot"></div>
@@ -892,6 +958,511 @@ function mobileNavTo(id, btn) {
   document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
 }
+
+// ─── Alpona SVG generator — rich traditional patterns ─────────────────────────
+(function(){
+  var ns='http://www.w3.org/2000/svg';
+  var C='#e4dcc8'; // chalk off-white, warm
+
+  function mk(tag,a){
+    var e=document.createElementNS(ns,tag);
+    for(var k in a) e.setAttribute(k,a[k]);
+    return e;
+  }
+  function sd(deg){return Math.sin(deg*Math.PI/180);}
+  function cd(deg){return Math.cos(deg*Math.PI/180);}
+  function mkSvg(vb){
+    var s=document.createElementNS(ns,'svg');
+    s.setAttribute('viewBox',vb);
+    s.setAttribute('preserveAspectRatio','xMidYMid slice');
+    return s;
+  }
+
+  // ── Shared primitives ──────────────────────────────────────────────────────
+
+  // Scalloped ring: main circle + N small circles touching its outer edge
+  function scallopyRing(g, cx, cy, R, N, sr, fo, so, sw){
+    g.appendChild(mk('circle',{cx:cx,cy:cy,r:R,fill:'none',
+      stroke:C,'stroke-width':sw||0.6,'stroke-opacity':so||0.14}));
+    // inner companion ring
+    g.appendChild(mk('circle',{cx:cx,cy:cy,r:R-sr*0.6,fill:'none',
+      stroke:C,'stroke-width':(sw||0.6)*0.5,'stroke-opacity':(so||0.14)*0.6}));
+    for(var i=0;i<N;i++){
+      var a=i*(360/N);
+      var bx=cx+R*sd(a), by=cy-R*cd(a);
+      g.appendChild(mk('circle',{cx:bx.toFixed(2),cy:by.toFixed(2),r:sr,
+        fill:C,'fill-opacity':fo||0.10,
+        stroke:C,'stroke-width':(sw||0.6)*0.4,'stroke-opacity':(so||0.14)*0.8}));
+    }
+  }
+
+  // Teardrop petal ring: N petals pointing outward from radius R
+  function petalRing(g, cx, cy, R, N, hw, len, fo, offset){
+    offset=offset||0;
+    for(var i=0;i<N;i++){
+      var a=i*(360/N)+offset;
+      var h1=len*0.22, h2=len*0.70;
+      var d='M 0,0 C '+hw+','+(-(h1.toFixed(1)))+' '+(hw*0.55).toFixed(1)+','+(-(h2.toFixed(1)))+' 0,'+(-len)+
+            ' C '+(-(hw*0.55).toFixed(1))+','+(-(h2.toFixed(1)))+' '+(-hw)+','+(-(h1.toFixed(1)))+' 0,0 Z';
+      g.appendChild(mk('path',{d:d,fill:C,'fill-opacity':fo||0.10,
+        stroke:C,'stroke-width':'0.3','stroke-opacity':(fo||0.10)*0.7,
+        transform:'rotate('+a+','+cx+','+cy+') translate('+cx+','+(cy-R)+')'}));
+    }
+  }
+
+  // Diamond dot ring: N small rotated squares on radius R
+  function diamondRing(g, cx, cy, R, N, sz, fo, offset){
+    offset=offset||0;
+    for(var i=0;i<N;i++){
+      var a=i*(360/N)+offset;
+      var px=cx+R*sd(a), py=cy-R*cd(a);
+      g.appendChild(mk('rect',{x:(px-sz).toFixed(1),y:(py-sz).toFixed(1),
+        width:sz*2,height:sz*2,fill:C,'fill-opacity':fo||0.12,
+        transform:'rotate(45,'+px.toFixed(1)+','+py.toFixed(1)+')'}));
+    }
+  }
+
+  // Dot ring
+  function dotRing(g, cx, cy, R, N, r, fo, offset){
+    offset=offset||0;
+    for(var i=0;i<N;i++){
+      var a=i*(360/N)+offset;
+      var px=cx+R*sd(a), py=cy-R*cd(a);
+      g.appendChild(mk('circle',{cx:px.toFixed(1),cy:py.toFixed(1),
+        r:r,fill:C,'fill-opacity':fo||0.13}));
+    }
+  }
+
+  // Paisley/mango-leaf motif pointing outward at angle a from (cx,cy)
+  function paisley(g, cx, cy, R, a, scale, fo){
+    var len=26*scale, hw=8*scale;
+    var h1=len*0.28,h2=len*0.72;
+    var d='M 0,2 C '+hw+','+(-h1.toFixed(1))+' '+(hw*0.6).toFixed(1)+','+(-h2.toFixed(1))+' 0,'+(-len)+
+          ' C '+(-(hw*0.6).toFixed(1))+','+(-h2.toFixed(1))+' '+(-hw)+','+(-h1.toFixed(1))+' 0,2 Z';
+    g.appendChild(mk('path',{d:d,fill:C,'fill-opacity':fo||0.13,
+      stroke:C,'stroke-width':'0.35','stroke-opacity':(fo||0.13)*0.8,
+      transform:'rotate('+a+','+cx+','+cy+') translate('+cx+','+(cy-R)+')'}));
+    // tip dot
+    var tipR=R+len+2*scale;
+    g.appendChild(mk('circle',{
+      cx:(cx+tipR*sd(a)).toFixed(1),cy:(cy-tipR*cd(a)).toFixed(1),
+      r:(1.6*scale).toFixed(1),fill:C,'fill-opacity':((fo||0.13)*1.2).toFixed(3)}));
+  }
+
+  // Small 8-petal rosette at (cx,cy) with petal radius pr
+  function miniRosette(g, cx, cy, pr, N, fo){
+    N=N||8;
+    for(var i=0;i<N;i++){
+      var a=i*(360/N);
+      var px=cx+pr*sd(a)*0.5, py=cy-pr*cd(a)*0.5;
+      g.appendChild(mk('circle',{cx:px.toFixed(1),cy:py.toFixed(1),
+        r:(pr*0.55).toFixed(1),fill:C,'fill-opacity':fo||0.12,
+        stroke:C,'stroke-width':'0.35','stroke-opacity':(fo||0.12)*0.8}));
+    }
+    g.appendChild(mk('circle',{cx:cx,cy:cy,r:(pr*0.35).toFixed(1),
+      fill:C,'fill-opacity':((fo||0.12)*1.4).toFixed(3)}));
+  }
+
+  // 8-line radial starburst at (cx,cy)
+  function starburst(g, cx, cy, r1, r2, N, so){
+    N=N||8;
+    for(var i=0;i<N;i++){
+      var a=i*(360/N);
+      g.appendChild(mk('line',{
+        x1:(cx+r1*sd(a)).toFixed(1),y1:(cy-r1*cd(a)).toFixed(1),
+        x2:(cx+r2*sd(a)).toFixed(1),y2:(cy-r2*cd(a)).toFixed(1),
+        stroke:C,'stroke-width':'0.4','stroke-opacity':so||0.12}));
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 1. FULL-VIEWPORT BACKGROUND ALPONA
+  // ══════════════════════════════════════════════════════════════════════════
+  // Each ring is wrapped in its own <g class="ripple-ring"> with a staggered
+  // animation-delay. Inner rings lead, outer rings follow — like water ripples
+  // moving outward from the lotus. Period = 8s, stagger = 0.55s per ring.
+  // ──────────────────────────────────────────────────────────────────────────
+  var container=document.getElementById('alponaBg');
+  if(container){
+    var svg=mkSvg('-700 -450 1400 900');
+    var root=document.createElementNS(ns,'g'); // static root group
+    svg.appendChild(root);
+
+    // Helper: create a ripple group — pure scale breathe, staggered delay only.
+    // delay increases per ring so the expand pulse travels outward like a ripple.
+    // All rings share the same period so the wave stays coherent.
+    function rg(delay){
+      var gr=document.createElementNS(ns,'g');
+      gr.setAttribute('class','ripple-ring');
+      gr.style.animation = 'rippleScale 8s ease-in-out infinite';
+      gr.style.animationDelay = (-delay).toFixed(2)+'s'; // negative = pre-offset, no initial pause
+      root.appendChild(gr);
+      return gr;
+    }
+
+    // ── Static layer: 8-fold & 16-fold tracery lines ───────────────────────
+    // These don't ripple — they stay fixed as a subtle ground grid
+    var st=document.createElementNS(ns,'g');
+    root.appendChild(st);
+    for(var i=0;i<8;i++){
+      st.appendChild(mk('line',{x1:'200',y1:'0',x2:'690',y2:'0',
+        stroke:C,'stroke-width':'0.22','stroke-opacity':'0.04',
+        transform:'rotate('+(i*45)+')'}));
+    }
+    for(var i=0;i<16;i++){
+      st.appendChild(mk('line',{x1:'220',y1:'0',x2:'520',y2:'0',
+        stroke:C,'stroke-width':'0.15','stroke-opacity':'0.028',
+        transform:'rotate('+(i*22.5)+')'}));
+    }
+
+    // Ring config: [delay, anim, period]
+    // Odd rings rotate (alternating CW/CCW), even rings scale-only.
+    // Period increases outward — outer rings move slower, like real water ripples.
+    // Breathe scale range is baked into rippleCW/CCW/Scale keyframes.
+    // Rotation period is long (40–80s) so it reads as slow drift, not spinning.
+
+    // ── Ring 1 (r=228) — delay 0s ─────────────────────────────────────────
+    var r1=rg(0);
+    scallopyRing(r1,0,0,228,24,7,0.11,0.14,0.55);
+    petalRing(r1,0,0,228,24,6,18,0.09,7.5);
+    dotRing(r1,0,0,208,24,2,0.12,7.5);
+
+    // ── Ring 2 (r=272) — delay 1.14s ─────────────────────────────────────
+    var r2=rg(1.14);
+    r2.appendChild(mk('circle',{cx:'0',cy:'0',r:'272',fill:'none',
+      stroke:C,'stroke-width':'0.4','stroke-opacity':'0.08'}));
+    r2.appendChild(mk('circle',{cx:'0',cy:'0',r:'264',fill:'none',
+      stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05','stroke-dasharray':'2 4'}));
+    dotRing(r2,0,0,272,32,1.8,0.10,0);
+    dotRing(r2,0,0,272,32,1.0,0.08,5.625);
+
+    // ── Ring 3 (r=312) — delay 2.28s ─────────────────────────────────────
+    var r3=rg(2.28);
+    scallopyRing(r3,0,0,312,32,6.5,0.12,0.16,0.65);
+    petalRing(r3,0,0,312,16,8,24,0.11,5.625);
+    diamondRing(r3,0,0,298,32,2.2,0.10,5.625);
+    dotRing(r3,0,0,327,32,1.5,0.09,0);
+    starburst(r3,0,0,315,355,8,0.07);
+    for(var i=0;i<8;i++){
+      var a=i*45, r=355;
+      r3.appendChild(mk('circle',{
+        cx:(r*sd(a)).toFixed(1),cy:(-r*cd(a)).toFixed(1),
+        r:'3.5',fill:C,'fill-opacity':'0.10'}));
+    }
+
+    // ── Ring 4 (r=368) — delay 3.42s ─────────────────────────────────────
+    var r4=rg(3.42);
+    r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'368',fill:'none',
+      stroke:C,'stroke-width':'0.6','stroke-opacity':'0.13'}));
+    r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'358',fill:'none',
+      stroke:C,'stroke-width':'0.35','stroke-opacity':'0.07'}));
+    r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'378',fill:'none',
+      stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05','stroke-dasharray':'1.5 3.5'}));
+    petalRing(r4,0,0,368,24,7,20,0.10,7.5);
+    petalRing(r4,0,0,368,24,4,12,0.07,0);
+    dotRing(r4,0,0,368,48,1.4,0.09,3.75);
+    dotRing(r4,0,0,388,48,1.0,0.07,7.5);
+
+    // ── Ring 5 (r=418) — delay 4.56s ─────────────────────────────────────
+    var r5=rg(4.56);
+    scallopyRing(r5,0,0,418,40,5.5,0.10,0.13,0.55);
+    for(var i=0;i<16;i++) paisley(r5,0,0,418,i*22.5,1.0,0.12);
+    dotRing(r5,0,0,418,40,1.3,0.08,4.5);
+    dotRing(r5,0,0,435,40,0.9,0.06,0);
+
+    // ── Ring 6 (r=468) — delay 5.7s ──────────────────────────────────────
+    var r6=rg(5.7);
+    [464,468,474].forEach(function(r,j){
+      r6.appendChild(mk('circle',{cx:'0',cy:'0',r:r,fill:'none',
+        stroke:C,'stroke-width':[0.3,0.55,0.22][j],'stroke-opacity':[0.06,0.12,0.05][j]}));
+    });
+    dotRing(r6,0,0,468,48,1.6,0.09,3.75);
+    petalRing(r6,0,0,468,24,6,16,0.08,0);
+    [0,45,90,135,180,225,270,315].forEach(function(a,j){
+      var pr=468, mx=pr*sd(a), my=-pr*cd(a);
+      if(j%2===0) miniRosette(r6,mx,my,9,6,0.10);
+      else         miniRosette(r6,mx,my,7,6,0.08);
+    });
+
+    // ── Ring 7 (r=522) — delay 6.84s ─────────────────────────────────────
+    var r7=rg(6.84);
+    scallopyRing(r7,0,0,522,48,5.0,0.09,0.11,0.5);
+    petalRing(r7,0,0,522,32,5,14,0.07,5.625);
+    dotRing(r7,0,0,540,48,1.2,0.07,3.75);
+
+    // ── Cardinal paisley clusters — delay 7.98s ───────────────────────────
+    var rOut=rg(7.98);
+    [0,90,180,270].forEach(function(base){
+      [-10,0,10].forEach(function(spread){
+        paisley(rOut,0,0,490,base+spread,1.3,0.10);
+      });
+      var cr=540;
+      miniRosette(rOut,cr*sd(base),-cr*cd(base),10,8,0.11);
+    });
+
+    // ── Diagonal mini-mandala corners — CCW, 90s, delay 4.2s ─────────────
+    [45,135,225,315].forEach(function(a){
+      var dr=510;
+      var mx=dr*sd(a), my=-dr*cd(a);
+      [14,10,6].forEach(function(r,j){
+        rOut.appendChild(mk('circle',{cx:mx.toFixed(1),cy:my.toFixed(1),r:r,
+          fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':[0.12,0.10,0.09][j]}));
+      });
+      dotRing(rOut,mx,my,14,12,1.4,0.10,0);
+      rOut.appendChild(mk('circle',{cx:mx.toFixed(1),cy:my.toFixed(1),r:'3',
+        fill:C,'fill-opacity':'0.14'}));
+      starburst(rOut,mx,my,6,16,8,0.09);
+    });
+
+    // ── Vine tendrils — static (they're at screen edges, ripple looks odd) ─
+    [0,90,180,270].forEach(function(base){
+      st.appendChild(mk('path',{
+        d:'M 0,-538 Q 16,-568 -4,-600 Q -20,-632 6,-665 Q 18,-690 0,-710',
+        fill:'none',stroke:C,'stroke-width':'0.5','stroke-opacity':'0.06',
+        transform:'rotate('+base+')'}));
+      [{y:-555,x:14,r:20},{y:-615,x:-16,r:-22},{y:-672,x:12,r:18}].forEach(function(lf){
+        st.appendChild(mk('path',{
+          d:'M 0,0 C 4,-3 5,-11 0,-17 C -5,-11 -4,-3 0,0 Z',
+          fill:C,'fill-opacity':'0.07',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05',
+          transform:'rotate('+base+') translate('+lf.x+','+lf.y+') rotate('+lf.r+')'}));
+      });
+    });
+
+    container.appendChild(svg);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 2. BOTTOM BORDER BAND — most prominent, like the reference image
+  // ══════════════════════════════════════════════════════════════════════════
+  var btm=document.getElementById('alponaBorderBottom');
+  if(btm){
+    var bsvg=document.createElementNS(ns,'svg');
+    bsvg.setAttribute('viewBox','0 0 1400 80');
+    bsvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    bsvg.style.width='100%'; bsvg.style.height='100%';
+    var bg=document.createElementNS(ns,'g');
+    bsvg.appendChild(bg);
+
+    // Horizontal double baseline
+    bg.appendChild(mk('line',{x1:'0',y1:'8',x2:'1400',y2:'8',
+      stroke:C,'stroke-width':'0.6','stroke-opacity':'0.18'}));
+    bg.appendChild(mk('line',{x1:'0',y1:'12',x2:'1400',y2:'12',
+      stroke:C,'stroke-width':'0.3','stroke-opacity':'0.10'}));
+    bg.appendChild(mk('line',{x1:'0',y1:'74',x2:'1400',y2:'74',
+      stroke:C,'stroke-width':'0.5','stroke-opacity':'0.15'}));
+    bg.appendChild(mk('line',{x1:'0',y1:'78',x2:'1400',y2:'78',
+      stroke:C,'stroke-width':'0.25','stroke-opacity':'0.09'}));
+
+    // Repeating lotus flowers spaced 100px apart along bottom
+    var spacing=100, count=15;
+    for(var j=0;j<count;j++){
+      var bx=spacing*0.5 + j*spacing, by=42;
+
+      // Connecting vine between flowers
+      if(j<count-1){
+        var nx=bx+spacing;
+        bg.appendChild(mk('path',{
+          d:'M '+(bx+22)+','+by+' Q '+(bx+spacing*0.5)+','+(by-14)+' '+(nx-22)+','+by,
+          fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':'0.12'}));
+        // vine leaf
+        bg.appendChild(mk('path',{
+          d:'M 0,0 C 3,-3 3,-9 0,-13 C -3,-9 -3,-3 0,0 Z',
+          fill:C,'fill-opacity':'0.10',
+          transform:'translate('+(bx+spacing*0.5)+','+(by-10)+') rotate(-5)'}));
+      }
+
+      // Flower at bx,by
+      // Outer scalloped ring
+      for(var p=0;p<12;p++){
+        var pa=p*30;
+        bg.appendChild(mk('circle',{
+          cx:(bx+18*sd(pa)).toFixed(1),cy:(by-18*cd(pa)).toFixed(1),
+          r:'4.5',fill:C,'fill-opacity':'0.10',
+          stroke:C,'stroke-width':'0.3','stroke-opacity':'0.13'}));
+      }
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'18',fill:'none',
+        stroke:C,'stroke-width':'0.5','stroke-opacity':'0.13'}));
+
+      // Mid petal ring (8 teardrops)
+      for(var p=0;p<8;p++){
+        var pa=p*45;
+        var d='M 0,0 C 3.5,-2 3.5,-10 0,-15 C -3.5,-10 -3.5,-2 0,0 Z';
+        bg.appendChild(mk('path',{d:d,fill:C,'fill-opacity':'0.14',
+          transform:'rotate('+pa+','+bx+','+by+') translate('+bx+','+(by-7)+')'}));
+      }
+
+      // Inner ring
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'9',fill:'none',
+        stroke:C,'stroke-width':'0.45','stroke-opacity':'0.15'}));
+
+      // Diamond dot ring at r=9
+      for(var p=0;p<8;p++){
+        var pa=p*45, pr=9;
+        var dx=bx+pr*sd(pa), dy=by-pr*cd(pa);
+        bg.appendChild(mk('rect',{x:(dx-1.5).toFixed(1),y:(dy-1.5).toFixed(1),
+          width:'3',height:'3',fill:C,'fill-opacity':'0.14',
+          transform:'rotate(45,'+dx.toFixed(1)+','+dy.toFixed(1)+')'}));
+      }
+
+      // Center dot
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'4',
+        fill:C,'fill-opacity':'0.18'}));
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'1.8',
+        fill:C,'fill-opacity':'0.26'}));
+
+      // 4 small accent dots at 45° outside
+      [45,135,225,315].forEach(function(aa){
+        bg.appendChild(mk('circle',{
+          cx:(bx+24*sd(aa)).toFixed(1),cy:(by-24*cd(aa)).toFixed(1),
+          r:'1.5',fill:C,'fill-opacity':'0.10'}));
+      });
+    }
+
+    btm.appendChild(bsvg);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 3. TOP BORDER BAND
+  // ══════════════════════════════════════════════════════════════════════════
+  var top=document.getElementById('alponaBorderTop');
+  if(top){
+    var tsvg=document.createElementNS(ns,'svg');
+    tsvg.setAttribute('viewBox','0 0 1400 72');
+    tsvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    tsvg.style.width='100%'; tsvg.style.height='100%';
+    var tg=document.createElementNS(ns,'g');
+    tsvg.appendChild(tg);
+
+    // Double baseline at bottom of top strip
+    tg.appendChild(mk('line',{x1:'0',y1:'62',x2:'1400',y2:'62',
+      stroke:C,'stroke-width':'0.6','stroke-opacity':'0.16'}));
+    tg.appendChild(mk('line',{x1:'0',y1:'66',x2:'1400',y2:'66',
+      stroke:C,'stroke-width':'0.3','stroke-opacity':'0.09'}));
+    tg.appendChild(mk('line',{x1:'0',y1:'4',x2:'1400',y2:'4',
+      stroke:C,'stroke-width':'0.4','stroke-opacity':'0.12'}));
+
+    // Repeating smaller motifs
+    var tspacing=80, tcount=18;
+    for(var j=0;j<tcount;j++){
+      var tx=tspacing*0.5 + j*tspacing, ty=36;
+
+      // Connecting arc
+      if(j<tcount-1){
+        var tnx=tx+tspacing;
+        tg.appendChild(mk('path',{
+          d:'M '+(tx+16)+','+ty+' Q '+(tx+tspacing*0.5)+','+(ty+12)+' '+(tnx-16)+','+ty,
+          fill:'none',stroke:C,'stroke-width':'0.4','stroke-opacity':'0.10'}));
+      }
+
+      // 8-petal scalloped mini-flower
+      for(var p=0;p<8;p++){
+        var pa=p*45;
+        tg.appendChild(mk('circle',{
+          cx:(tx+13*sd(pa)).toFixed(1),cy:(ty-13*cd(pa)).toFixed(1),
+          r:'3.5',fill:C,'fill-opacity':'0.09',
+          stroke:C,'stroke-width':'0.25','stroke-opacity':'0.11'}));
+      }
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'13',fill:'none',
+        stroke:C,'stroke-width':'0.45','stroke-opacity':'0.12'}));
+
+      // 6 inner petals
+      for(var p=0;p<6;p++){
+        var pa=p*60;
+        var d='M 0,0 C 2.5,-1.5 2.5,-7 0,-11 C -2.5,-7 -2.5,-1.5 0,0 Z';
+        tg.appendChild(mk('path',{d:d,fill:C,'fill-opacity':'0.13',
+          transform:'rotate('+pa+','+tx+','+ty+') translate('+tx+','+(ty-5)+')'}));
+      }
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'4',fill:'none',
+        stroke:C,'stroke-width':'0.4','stroke-opacity':'0.14'}));
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'2',fill:C,'fill-opacity':'0.18'}));
+
+      // Dot accents
+      [0,90,180,270].forEach(function(aa){
+        tg.appendChild(mk('circle',{
+          cx:(tx+17*sd(aa)).toFixed(1),cy:(ty-17*cd(aa)).toFixed(1),
+          r:'1.3',fill:C,'fill-opacity':'0.10'}));
+      });
+    }
+
+    top.appendChild(tsvg);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 4. LEFT & RIGHT SIDE BORDERS — vertical repeating vine+leaf strip
+  // ══════════════════════════════════════════════════════════════════════════
+  function buildSideBorder(container, flip){
+    var ssvg=document.createElementNS(ns,'svg');
+    ssvg.setAttribute('viewBox','0 0 52 900');
+    ssvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    ssvg.style.width='100%'; ssvg.style.height='100%';
+    var sg=document.createElementNS(ns,'g');
+    ssvg.appendChild(sg);
+
+    var cx=flip?12:40;
+
+    // Vertical spine line
+    sg.appendChild(mk('line',{x1:cx,y1:'0',x2:cx,y2:'900',
+      stroke:C,'stroke-width':'0.5','stroke-opacity':'0.14'}));
+    sg.appendChild(mk('line',{x1:(cx+(flip?4:-4)),y1:'0',x2:(cx+(flip?4:-4)),y2:'900',
+      stroke:C,'stroke-width':'0.25','stroke-opacity':'0.08'}));
+
+    // Repeating motif every 80px
+    var vspacing=80;
+    for(var j=0;j<12;j++){
+      var vy=vspacing*0.5 + j*vspacing;
+
+      // Alternating: full rosette vs leaf cluster
+      if(j%2===0){
+        // Mini rosette
+        [10,7,4].forEach(function(r,ri){
+          sg.appendChild(mk('circle',{cx:cx,cy:vy,r:r,fill:'none',
+            stroke:C,'stroke-width':'0.4','stroke-opacity':[0.14,0.11,0.09][ri]}));
+        });
+        dotRing(sg,cx,vy,10,8,1.4,0.10,0);
+        sg.appendChild(mk('circle',{cx:cx,cy:vy,r:'3',fill:C,'fill-opacity':'0.16'}));
+        starburst(sg,cx,vy,4,12,8,0.09);
+
+        // Leaf accent extending toward screen interior
+        var dir=flip?1:-1;
+        var d='M 0,0 C '+(4*dir)+','+-3+' '+(5*dir)+','+-11+' 0,-17 C '+(-5*dir)+','+-11+' '+(-4*dir)+','+-3+' 0,0 Z';
+        sg.appendChild(mk('path',{d:d,fill:C,'fill-opacity':'0.11',
+          transform:'translate('+cx+','+(vy-12)+') rotate('+(dir*25)+')'}));
+        sg.appendChild(mk('path',{d:d,fill:C,'fill-opacity':'0.09',
+          transform:'translate('+cx+','+(vy+12)+') rotate('+(dir*-25)+') rotate(180)'}));
+
+      } else {
+        // 3-petal fan toward interior
+        var dir=flip?1:-1;
+        [-18,0,18].forEach(function(spread){
+          var d2='M 0,0 C 3,-2 3.5,-10 0,-16 C -3.5,-10 -3,-2 0,0 Z';
+          sg.appendChild(mk('path',{d:d2,fill:C,'fill-opacity':'0.10',
+            transform:'translate('+cx+','+vy+') rotate('+(90*dir+spread)+')'}));
+        });
+        // Center diamond
+        sg.appendChild(mk('rect',{x:(cx-2.5),y:(vy-2.5),width:'5',height:'5',
+          fill:C,'fill-opacity':'0.14',
+          transform:'rotate(45,'+cx+','+vy+')'}));
+        // Two flanking dots on the spine
+        sg.appendChild(mk('circle',{cx:cx,cy:(vy-22),r:'1.5',fill:C,'fill-opacity':'0.10'}));
+        sg.appendChild(mk('circle',{cx:cx,cy:(vy+22),r:'1.5',fill:C,'fill-opacity':'0.10'}));
+      }
+
+      // Dot connector between motifs
+      [vspacing*0.3, vspacing*0.7].forEach(function(off){
+        sg.appendChild(mk('circle',{cx:cx,cy:(vy-vspacing*0.5+off),
+          r:'1',fill:C,'fill-opacity':'0.09'}));
+      });
+    }
+
+    container.appendChild(ssvg);
+  }
+
+  var lft=document.getElementById('alponaBorderLeft');
+  var rgt=document.getElementById('alponaBorderRight');
+  if(lft) buildSideBorder(lft,true);
+  if(rgt) buildSideBorder(rgt,false);
+
+})();
 
 // Session timer
 let secs=134;

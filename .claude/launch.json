@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "7824"],
       "port": 7824
+    },
+    {
+      "name": "sureline-complete",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "require('http').createServer((req,res)=>{const fs=require('fs');const path=require('path');const base='C:/Users/subhadeep.m/.gstack/projects/Subhadeepthegreat-Sureline/designs/sureline-app-complete-20260414';const file=req.url==='/'||req.url===''?base+'/finalized.html':base+req.url;try{res.writeHead(200,{'Content-Type':'text/html;charset=utf-8'});fs.createReadStream(file).pipe(res);}catch(e){res.writeHead(404);res.end();}}).listen(7825)"],
+      "port": 7825
     }
   ]
 }

@@ -14,8 +14,10 @@ Does automatically:
 import argparse
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
+import webbrowser
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -124,24 +126,30 @@ def main():
     _say("  SURELINE  —  Enterprise Voice Agent")
     _say("━" * 50)
 
-    # ── 1. Ollama ─────────────────────────────────────────────────
-    _say("\n[1/3] Checking Ollama...")
-    if _ollama_running():
-        _say("   Ollama already running.")
-    elif not _start_ollama():
-        sys.exit(1)
+    # ── 1 & 2. Ollama — only needed if no cloud LLM is configured ──
+    from sureline.config import has_cloud_llm_key
+    _using_cloud = has_cloud_llm_key()
+    if _using_cloud:
+        _say("\n[1/2] Cloud LLM detected — skipping Ollama setup.")
+    else:
+        _say("\n[1/3] Checking Ollama...")
+        if _ollama_running():
+            _say("   Ollama already running.")
+        elif not _start_ollama():
+            sys.exit(1)
 
-    # ── 2. Model ──────────────────────────────────────────────────
-    _say(f"\n[2/3] Checking model ({MODEL})...")
-    if not _ensure_model(MODEL):
-        sys.exit(1)
+        _say(f"\n[2/3] Checking model ({MODEL})...")
+        if not _ensure_model(MODEL):
+            sys.exit(1)
 
-    # ── 3. Database ───────────────────────────────────────────────
-    _say("\n[3/3] Checking database...")
+    # ── Database ──────────────────────────────────────────────────
+    _total = "2" if _using_cloud else "3"
+    _say(f"\n[{_total}/{_total}] Checking database...")
     _ensure_database()
 
     # ── 4. Launch ─────────────────────────────────────────────────
     import asyncio
+    import web_server
     from pipeline import run_voice_mode, run_text_mode
 
     _say("\n" + "━" * 50)
@@ -153,10 +161,29 @@ def main():
         _say("  Barge-in enabled — interrupt the agent any time")
     _say("━" * 50 + "\n")
 
-    if args.text_mode:
-        asyncio.run(run_text_mode())
-    else:
-        asyncio.run(run_voice_mode())
+    # ── 4a. Serve the frontend over HTTP ─────────────────────────
+    web_server.start_http_server()
+    _say(f"  UI:   http://127.0.0.1:{web_server.HTTP_PORT}")
+
+    # ── 4b. Open the browser after HTTP server has had a moment to bind ─
+    threading.Thread(
+        target=lambda: (time.sleep(1.5), webbrowser.open(f"http://127.0.0.1:{web_server.HTTP_PORT}")),
+        daemon=True,
+    ).start()
+
+    # ── 4c. Run WS broadcaster + pipeline in the same event loop ─
+    async def _run_all():
+        ws_server = await web_server.start_ws_server()
+        try:
+            if args.text_mode:
+                await run_text_mode()
+            else:
+                await run_voice_mode()
+        finally:
+            ws_server.close()
+            await ws_server.wait_closed()
+
+    asyncio.run(_run_all())
 
 
 if __name__ == "__main__":

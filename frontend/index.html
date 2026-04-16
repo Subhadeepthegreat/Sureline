@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sureline — Enterprise Voice Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Pretext — correct text layout. Vendor: ~/.claude/skills/gstack/design-html/vendor/pretext.js -->
+<script type="importmap">{"imports":{"@chenglou/pretext":"https://esm.sh/@chenglou/pretext"}}</script>
+<style>
+/* ─── Design Tokens (from DESIGN.md) ───────────────────────────────────────── */
+:root {
+  --bg-base:             #191614;
+  --bg-surface:          #151821;
+  --bg-elevated:         #1e2230;
+  --bg-orb-glow:         #1a0f22;
+  --text-primary:        #f0ead8;
+  --text-muted:          #6b7094;
+  --lotus-outer:         #8a5a6a;
+  --lotus-outer-light:   #c47a8a;
+  --lotus-mid:           #c47a8a;
+  --lotus-inner:         #b86a4e;
+  --lotus-inner-warm:    #d4835a;
+  --lotus-center:        #c49a2a;
+  --lotus-center-glow:   #e8c060;
+  --accent-orb:          #c47a8a;
+  --accent-data:         #4a6b65;
+  --accent-action:       #c49a2a;
+  --accent-terra:        #b86a4e;
+  --accent-frame:        #3d4a6e;
+  --accent-frame-light:  #5a6e9e;
+  --font-display:        'Cormorant Garamond', serif;
+  --font-body:           'DM Sans', sans-serif;
+  --font-mono:           'JetBrains Mono', monospace;
+  --radius-sm:           3px;
+  --radius-md:           4px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 16px; --sp-4: 24px;
+  --sp-5: 32px; --sp-6: 48px; --sp-7: 64px;
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  background: var(--bg-base); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  height: 100%; overflow: hidden;
+}
+
+/* ─── Screen system ──────────────────────────────────────────────────────────── */
+.screen { display: none; width: 100%; height: 100vh; position: relative; }
+.screen.active { display: flex; flex-direction: column; }
+.screen-admin.active, .screen-data.active,
+.screen-calls.active, .screen-onboard.active,
+.screen-sessions.active, .screen-agent.active, .screen-voice.active,
+.screen-telephony.active, .screen-apikeys.active, .screen-users.active { display: grid; }
+
+/* ─── Alpona ring ripple (pure scale-breathe, phase-staggered) ───────────────── */
+.ripple-ring {
+  transform-box: view-box;
+  transform-origin: center center;
+}
+@keyframes rippleScale {
+  0%,100% { transform: scale(0.974); opacity: 0.80; }
+  50%      { transform: scale(1.028); opacity: 1.00; }
+}
+
+/* ─── Alpona border strips ───────────────────────────────────────────────────── */
+.alpona-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.alpona-bg svg { width: 100%; height: 100%; display: block; }
+.grain-overlay {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px; background-repeat: repeat;
+}
+.alpona-border-top, .alpona-border-bottom {
+  position: absolute; left: 0; right: 0; z-index: 5; pointer-events: none;
+}
+.alpona-border-top    { top: 0;    height: 72px; }
+.alpona-border-bottom { bottom: 0; height: 80px; }
+.alpona-border-left, .alpona-border-right {
+  position: absolute; top: 0; bottom: 0; z-index: 5; pointer-events: none; width: 52px;
+}
+.alpona-border-left  { left: 0; }
+.alpona-border-right { right: 0; }
+.alpona-border-top svg, .alpona-border-bottom svg,
+.alpona-border-left svg, .alpona-border-right svg { width: 100%; height: 100%; display: block; }
+
+/* ─── Orb screen ─────────────────────────────────────────────────────────────── */
+.screen-orb {
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, #150d08 0%, var(--bg-base) 65%);
+  grid-template-rows: auto 1fr auto;
+}
+.screen-orb.active { display: grid !important; }
+
+.orb-chrome-top {
+  padding: 16px 32px; display: flex; align-items: center;
+  justify-content: space-between; position: relative; z-index: 10;
+  background: rgba(21,24,33,0.60);
+  border-bottom: 1px solid rgba(61,74,110,0.22);
+  backdrop-filter: blur(12px);
+}
+.orb-brand { display: flex; align-items: center; gap: 14px; min-width: 160px; }
+.orb-brand-name {
+  font-family: var(--font-display); font-style: italic; font-size: 18px;
+  font-weight: 300; color: var(--text-primary);
+}
+.orb-back-link {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-muted); cursor: pointer;
+  background: none; border: none; padding: 0; transition: color 0.2s;
+}
+.orb-back-link:hover { color: var(--text-primary); }
+.orb-live-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.12em; color: var(--accent-data); text-transform: uppercase;
+}
+.orb-live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent-data);
+  animation: livePulse 2s ease-in-out infinite;
+  transition: background 0.4s;
+}
+.orb-live-dot.ws-connecting   { background: var(--accent-action); }
+.orb-live-dot.ws-connected    { background: var(--accent-data); }
+.orb-live-dot.ws-disconnected { background: var(--accent-terra); animation: none; }
+@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+.orb-session-info {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-muted); letter-spacing: 0.08em;
+}
+
+.orb-center {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 40px; padding: 40px 0;
+  position: relative; z-index: 4;
+}
+.orb-canvas-wrap { position: relative; width: 380px; height: 380px; }
+.lotus-svg { width: 100%; height: 100%; }
+
+/* Lotus ring animation classes — transform-box: fill-box = all pivot at (0,0) */
+.lotus-outer-glow  { filter: url(#lotusGlow); transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite; }
+.lotus-outer-ring  { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite; }
+.lotus-mid-ring    { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.3s; }
+.lotus-inner-ring  { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.6s; }
+.lotus-center-ring { transform-box: fill-box; transform-origin: center; animation: idleBreathe 4s ease-in-out infinite 0.9s; }
+@keyframes idleBreathe { 0%,100%{transform:scale(0.97);opacity:0.9} 50%{transform:scale(1.02);opacity:1} }
+
+/* Wave rings */
+.wave-ring {
+  position: absolute; border-radius: 50%; border: 1px solid;
+  top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); pointer-events: none;
+}
+.wave-ring-1 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.25); }
+.wave-ring-2 { width: 380px; height: 380px; border-color: rgba(196,122,138,0.15); }
+.wave-ring-3 { width: 380px; height: 380px; border-color: rgba(100,40,20,0.22); }
+@keyframes waveExpand { 0%{transform:translate(-50%,-50%) scale(0.55);opacity:0.7} 100%{transform:translate(-50%,-50%) scale(1.4);opacity:0} }
+
+/* State-driven animations */
+/* Listening */
+.orb-canvas-wrap[data-state="listening"] .lotus-outer-glow { animation: listenPulse 1.2s ease-in-out infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-1 { animation: waveExpand 2s ease-out infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-2 { animation: waveExpand 2s ease-out 0.5s infinite; }
+.orb-canvas-wrap[data-state="listening"] .wave-ring-3 { animation: waveExpand 2s ease-out 1s infinite; }
+@keyframes listenPulse { 0%,100%{transform:scale(0.96)} 50%{transform:scale(1.06)} }
+
+/* Processing — all rings spin in place at same speed, alternating CW/CCW */
+.orb-canvas-wrap[data-state="processing"] .lotus-outer-glow  { animation: procRotateCW  9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-outer-ring  { animation: procRotateCCW 9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-mid-ring    { animation: procRotateCW  9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-inner-ring  { animation: procRotateCCW 9s linear infinite; }
+.orb-canvas-wrap[data-state="processing"] .lotus-center-ring { animation: procRotateCW  9s linear infinite; }
+@keyframes procRotateCW  { from{transform:rotate(0deg)}   to{transform:rotate(360deg)}  }
+@keyframes procRotateCCW { from{transform:rotate(0deg)}   to{transform:rotate(-360deg)} }
+
+/* Speaking */
+.orb-canvas-wrap[data-state="speaking"] .lotus-outer-glow { animation: speakBloom 0.6s ease-out forwards, speakPulse 0.4s ease-in-out 0.6s infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-1 { animation: waveExpand 1.2s ease-out infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-2 { animation: waveExpand 1.2s ease-out 0.3s infinite; }
+.orb-canvas-wrap[data-state="speaking"] .wave-ring-3 { animation: waveExpand 1.2s ease-out 0.6s infinite; }
+@keyframes speakBloom { 0%{transform:scale(1)} 100%{transform:scale(1.12)} }
+@keyframes speakPulse { 0%,100%{transform:scale(1.1)} 50%{transform:scale(1.15)} }
+
+/* Error */
+.orb-canvas-wrap[data-state="error"] .lotus-svg { filter: saturate(0.3) brightness(0.65); }
+
+.orb-status {
+  font-family: var(--font-display); font-style: italic; font-size: 22px;
+  font-weight: 400; color: var(--text-primary); letter-spacing: 0.02em;
+  text-align: center; min-height: 32px; transition: opacity 0.3s, color 0.3s;
+}
+.orb-transcript {
+  font-family: var(--font-body); font-size: 14px; color: var(--text-muted);
+  text-align: center; max-width: 420px; min-height: 44px;
+  letter-spacing: 0.01em; line-height: 1.7; transition: opacity 0.3s;
+}
+
+.orb-chrome-bottom {
+  padding: 14px 32px 24px; display: flex; align-items: center;
+  justify-content: space-between; position: relative; z-index: 4;
+  background: rgba(21,24,33,0.48);
+  border-top: 1px solid rgba(61,74,110,0.18);
+  backdrop-filter: blur(10px);
+}
+.orb-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; }
+.orb-meta .latency { transition: color 0.4s; }
+.orb-end-btn {
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: var(--radius-sm); cursor: pointer;
+  background: transparent; color: var(--accent-terra);
+  border: 1px solid rgba(184,106,78,0.4); letter-spacing: 0.05em;
+  transition: all 0.2s; min-height: 36px;
+}
+.orb-end-btn:hover { background: rgba(184,106,78,0.1); border-color: var(--accent-terra); }
+
+/* ── Conversation Log Panel ──────────────────────────────────────── */
+.conv-log {
+  position: absolute; right: 20px; top: 64px; bottom: 56px; width: 272px;
+  background: rgba(10, 12, 17, 0.78); border: 1px solid rgba(61,74,110,0.28);
+  border-radius: var(--radius-md); display: flex; flex-direction: column;
+  z-index: 8; backdrop-filter: blur(10px);
+}
+.conv-log-header {
+  padding: 9px 13px; border-bottom: 1px solid rgba(61,74,110,0.2); flex-shrink: 0;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em;
+  color: var(--text-muted); text-transform: uppercase; opacity: 0.7;
+}
+.conv-log-body {
+  flex: 1; overflow-y: auto; padding: 10px 13px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.conv-log-body::-webkit-scrollbar { width: 3px; }
+.conv-log-body::-webkit-scrollbar-track { background: transparent; }
+.conv-log-body::-webkit-scrollbar-thumb { background: rgba(61,74,110,0.45); border-radius: 2px; }
+.clog-entry { display: flex; flex-direction: column; gap: 2px; }
+.clog-label {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.11em; text-transform: uppercase; opacity: 0.55;
+}
+.clog-text { font-family: var(--font-body); font-size: 12px; line-height: 1.55; word-break: break-word; }
+.clog-entry.user   .clog-label { color: var(--accent-data); }
+.clog-entry.user   .clog-text  { color: #7ab8b0; }
+.clog-entry.bot    .clog-label { color: var(--text-muted); }
+.clog-entry.bot    .clog-text  { color: var(--text-primary); }
+.clog-entry.system .clog-label { color: var(--accent-terra); }
+.clog-entry.system .clog-text  { color: var(--accent-terra); font-size: 11px; font-family: var(--font-mono); opacity: 0.7; }
+.clog-entry.interrupted .clog-label { color: var(--accent-action); }
+.clog-entry.interrupted .clog-text  { color: var(--accent-action); font-size: 11px; font-family: var(--font-mono); opacity: 0.75; }
+
+/* Dev controls */
+.dev-controls {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 50; flex-wrap: wrap; justify-content: center;
+  background: rgba(13,15,20,0.85); padding: 10px 16px; border-radius: 6px;
+  border: 1px solid rgba(61,74,110,0.3); backdrop-filter: blur(8px);
+}
+.state-btn {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 7px 16px; border-radius: var(--radius-sm);
+  cursor: pointer; background: var(--bg-elevated); color: var(--text-muted);
+  border: 1px solid var(--accent-frame); transition: all 0.2s;
+}
+.state-btn:hover { color: var(--text-primary); border-color: var(--accent-frame-light); }
+.state-btn.active { background: var(--accent-frame); color: var(--text-primary); border-color: var(--accent-frame-light); }
+
+/* ─── Shared components ───────────────────────────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent-frame-light); margin-bottom: 32px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::before { content:''; display:block; width:32px; height:1px; background: var(--accent-frame); }
+
+.btn-primary {
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  padding: 10px 24px; border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--accent-action); color: var(--bg-base); border: none;
+  letter-spacing: 0.04em; transition: all 0.2s;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary {
+  font-family: var(--font-body); font-size: 14px; font-weight: 400;
+  padding: 10px 24px; border-radius: var(--radius-sm); cursor: pointer;
+  background: transparent; color: var(--text-primary);
+  border: 1px solid var(--accent-frame); letter-spacing: 0.04em; transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.15); }
+.btn-ghost {
+  font-family: var(--font-body); font-size: 14px; font-weight: 400;
+  padding: 10px 24px; border-radius: var(--radius-sm); cursor: pointer;
+  background: transparent; color: var(--text-muted); border: 1px solid transparent;
+  letter-spacing: 0.04em; transition: all 0.2s;
+}
+.btn-ghost:hover { color: var(--text-primary); border-color: rgba(107,112,148,0.3); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 2px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+}
+.badge-success { background: rgba(74,107,101,0.2);  color: var(--accent-data);         border: 1px solid rgba(74,107,101,0.4); }
+.badge-warning { background: rgba(196,154,42,0.15); color: var(--accent-action);        border: 1px solid rgba(196,154,42,0.35); }
+.badge-error   { background: rgba(184,106,78,0.15); color: var(--accent-terra);         border: 1px solid rgba(184,106,78,0.35); }
+.badge-neutral { background: rgba(61,74,110,0.2);   color: var(--accent-frame-light);   border: 1px solid rgba(61,74,110,0.4); }
+
+.card { background: var(--bg-surface); border: 1px solid rgba(61,74,110,0.2); border-radius: var(--radius-md); padding: 20px 24px; }
+.input-field {
+  width: 100%; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.35);
+  border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-primary);
+  font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.2s;
+}
+.input-field::placeholder { color: var(--text-muted); opacity: 0.6; }
+.input-field:focus { border-color: var(--accent-frame-light); }
+.input-label {
+  font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 6px; display: block;
+}
+.select-field {
+  width: 100%; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.35);
+  border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-primary);
+  font-family: var(--font-body); font-size: 14px; outline: none; cursor: pointer; appearance: none;
+}
+.form-group { margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ─── Admin / shell screens ───────────────────────────────────────────────────── */
+.admin-shell {
+  display: grid; grid-template-columns: 220px 1fr;
+  height: 100vh; background: var(--bg-base);
+}
+.admin-sidebar { background: var(--bg-surface); border-right: 1px solid rgba(61,74,110,0.2); padding: 24px 0; overflow-y: auto; }
+.admin-logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(61,74,110,0.15); margin-bottom: 20px; }
+.admin-logo-text { font-family: var(--font-display); font-style: italic; font-size: 22px; font-weight: 400; color: var(--text-primary); }
+.admin-logo-sub  { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+.nav-group { margin-bottom: 8px; }
+.nav-group-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); padding: 0 20px 6px; opacity: 0.6; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+  font-family: var(--font-body); font-size: 13px; color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; user-select: none;
+}
+.nav-item:hover { color: var(--text-primary); background: rgba(61,74,110,0.1); }
+.nav-item.active { color: var(--accent-orb); border-left-color: var(--accent-orb); background: rgba(196,122,138,0.08); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink: 0; }
+.admin-main { padding: 32px; overflow-y: auto; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.admin-title { font-family: var(--font-display); font-size: 26px; font-weight: 400; font-style: italic; color: var(--text-primary); }
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.2); border-radius: var(--radius-md); padding: 16px 18px; }
+.stat-val   { font-family: var(--font-mono); font-size: 24px; font-weight: 500; color: var(--text-primary); line-height: 1; }
+.stat-label { font-family: var(--font-body); font-size: 11px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.04em; }
+.stat-delta { font-family: var(--font-mono); font-size: 11px; color: var(--accent-data); margin-top: 4px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); text-align: left; padding: 0 12px 10px; border-bottom: 1px solid rgba(61,74,110,0.2); }
+.data-table td { font-family: var(--font-body); font-size: 13px; color: var(--text-primary); padding: 12px; border-bottom: 1px solid rgba(61,74,110,0.1); vertical-align: middle; }
+.data-table td.mono { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(61,74,110,0.06); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ─── Data setup ────────────────────────────────────────────────────────────── */
+.upload-zone {
+  border: 1.5px dashed rgba(61,74,110,0.5); border-radius: var(--radius-md); padding: 40px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(21,24,33,0.5);
+}
+.upload-zone:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.06); }
+.upload-icon { font-size: 28px; opacity: 0.6; }
+.upload-text { font-family: var(--font-body); font-size: 14px; color: var(--text-muted); }
+.upload-text strong { color: var(--accent-action); }
+.upload-hint { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; }
+.file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.file-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.2); border-radius: var(--radius-sm); }
+.file-icon { width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.file-icon-sql  { background: rgba(74,107,101,0.2);  color: var(--accent-data); }
+.file-icon-xlsx { background: rgba(196,154,42,0.15); color: var(--accent-action); }
+.file-icon-pdf  { background: rgba(184,106,78,0.15); color: var(--accent-terra); }
+.file-name   { font-family: var(--font-body); font-size: 13px; color: var(--text-primary); flex: 1; }
+.file-size   { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.file-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; }
+.file-status.ready      { color: var(--accent-data); }
+.file-status.processing { color: var(--accent-action); }
+
+/* ─── Call history ───────────────────────────────────────────────────────────── */
+.call-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-chip {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 2px; cursor: pointer;
+  background: var(--bg-elevated); color: var(--text-muted); border: 1px solid rgba(61,74,110,0.3); transition: all 0.15s;
+}
+.filter-chip.active { color: var(--accent-orb); border-color: rgba(196,122,138,0.4); }
+.filter-chip:hover:not(.active) { color: var(--text-primary); border-color: var(--accent-frame); }
+
+/* ─── Onboarding ─────────────────────────────────────────────────────────────── */
+.onboard-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 500px; border: 1px solid rgba(61,74,110,0.25); border-radius: 6px; overflow: hidden; }
+.onboard-left { background: radial-gradient(ellipse at 30% 50%, #1a0f22 0%, var(--bg-base) 70%); padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; }
+.onboard-left-title { font-family: var(--font-display); font-style: italic; font-size: 40px; font-weight: 300; color: var(--text-primary); line-height: 1.1; margin-bottom: 16px; }
+.onboard-left-sub   { font-family: var(--font-body); font-size: 14px; color: var(--text-muted); line-height: 1.7; max-width: 28ch; }
+.onboard-step-list  { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+.onboard-step       { display: flex; align-items: center; gap: 14px; }
+.onboard-step-num   { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; flex-shrink: 0; }
+.onboard-step-num.done   { background: rgba(74,107,101,0.2);  border: 1px solid var(--accent-data); color: var(--accent-data); }
+.onboard-step-num.active { background: rgba(196,122,138,0.15); border: 1px solid var(--accent-orb);  color: var(--accent-orb); }
+.onboard-step-num.pending{ background: var(--bg-elevated); border: 1px solid rgba(61,74,110,0.3); color: var(--text-muted); }
+.onboard-step-text.active  { color: var(--text-primary); font-family: var(--font-body); font-size: 13px; }
+.onboard-step-text.done    { color: var(--text-muted); font-family: var(--font-body); font-size: 13px; text-decoration: line-through; opacity: 0.6; }
+.onboard-step-text.pending { color: var(--text-muted); font-family: var(--font-body); font-size: 13px; opacity: 0.5; }
+.onboard-right { background: var(--bg-surface); padding: 40px 36px; border-left: 1px solid rgba(61,74,110,0.2); overflow-y: auto; }
+.onboard-form-title { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.onboard-form-sub   { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.onboard-progress { display: flex; gap: 4px; margin-bottom: 28px; }
+.progress-dot { height: 3px; border-radius: 2px; flex: 1; }
+.progress-dot.done   { background: var(--accent-data); }
+.progress-dot.active { background: var(--accent-orb); }
+.progress-dot.pending{ background: rgba(61,74,110,0.3); }
+
+/* ─── Login ──────────────────────────────────────────────────────────────────── */
+.login-layout { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; }
+.login-left {
+  background: radial-gradient(ellipse at 40% 60%, #1a0f18 0%, var(--bg-base) 70%);
+  padding: 48px 40px; display: flex; flex-direction: column; justify-content: center;
+}
+.login-lotus-mark { margin-bottom: 24px; opacity: 0.88; }
+.login-brand   { font-family: var(--font-display); font-style: italic; font-size: 48px; font-weight: 300; color: var(--text-primary); line-height: 1; margin-bottom: 8px; }
+.login-tagline { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-frame-light); margin-bottom: 16px; }
+.login-copy    { font-family: var(--font-body); font-size: 14px; color: var(--text-muted); line-height: 1.7; max-width: 26ch; margin-bottom: 32px; }
+.login-clients { display: flex; flex-wrap: wrap; gap: 8px; }
+.login-client-badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-muted); padding: 4px 10px; border: 1px solid rgba(61,74,110,0.3); border-radius: 2px; opacity: 0.55; }
+.login-right { background: var(--bg-surface); padding: 48px 40px; border-left: 1px solid rgba(61,74,110,0.2); display: flex; flex-direction: column; justify-content: center; }
+.login-form-title { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--text-primary); margin-bottom: 6px; }
+.login-form-sub   { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.btn-sso {
+  width: 100%; padding: 11px 20px; background: var(--bg-elevated);
+  border: 1px solid rgba(61,74,110,0.4); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--font-body); font-size: 14px; color: var(--text-primary);
+  cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
+}
+.btn-sso:hover { border-color: var(--accent-frame-light); background: rgba(61,74,110,0.12); }
+.btn-sso-glyph { width: 20px; height: 20px; background: #fff; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4285f4; flex-shrink: 0; }
+.login-divider { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background: rgba(61,74,110,0.25); }
+.login-divider span { font-family: var(--font-body); font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.login-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.login-remember { display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.login-forgot { font-family: var(--font-body); font-size: 13px; color: var(--accent-frame-light); cursor: pointer; }
+.login-forgot:hover { color: var(--text-primary); }
+.login-footer { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 20px; }
+.login-footer a { color: var(--accent-orb); cursor: pointer; }
+
+
+/* ── Session cards ────────────────────────────────────── */
+.session-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.session-card{background:var(--bg-elevated);border:1px solid rgba(61,74,110,0.25);border-radius:var(--radius-md);padding:18px 20px;}
+.session-card.live{border-color:rgba(74,107,101,0.45);box-shadow:0 0 0 1px rgba(74,107,101,0.12);}
+.session-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.session-id{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.session-client{font-family:var(--font-display);font-size:18px;font-weight:400;font-style:italic;color:var(--text-primary);margin-bottom:14px;}
+.session-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.session-stat-label{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;}
+.session-stat-val{font-family:var(--font-mono);font-size:14px;color:var(--text-primary);}
+/* ── Settings / toggles ───────────────────────────────── */
+.settings-section{margin-bottom:28px;}
+.settings-section-title{font-family:var(--font-display);font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(61,74,110,0.15);}
+.textarea-field{width:100%;background:var(--bg-elevated);border:1px solid rgba(61,74,110,0.35);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;outline:none;resize:vertical;min-height:80px;line-height:1.6;transition:border-color 0.2s;}
+.textarea-field:focus{border-color:var(--accent-frame-light);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(61,74,110,0.1);}
+.toggle-label-wrap{display:flex;flex-direction:column;gap:2px;}
+.toggle-label{font-family:var(--font-body);font-size:13px;color:var(--text-primary);}
+.toggle-sub{font-family:var(--font-body);font-size:11px;color:var(--text-muted);}
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--bg-elevated);border:1px solid rgba(61,74,110,0.4);border-radius:20px;cursor:pointer;transition:all 0.2s;}
+.toggle input:checked + .toggle-slider{background:var(--accent-data);border-color:var(--accent-data);}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--text-muted);border-radius:50%;transition:all 0.2s;}
+.toggle input:checked + .toggle-slider::before{transform:translateX(16px);background:var(--bg-base);}
+.range-wrap{display:flex;flex-direction:column;gap:6px;}
+.range-row{display:flex;align-items:center;gap:12px;}
+.range-field{flex:1;-webkit-appearance:none;appearance:none;height:3px;background:rgba(61,74,110,0.4);border-radius:2px;outline:none;}
+.range-field::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent-orb);cursor:pointer;}
+.range-val{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);min-width:36px;text-align:right;}
+.settings-col-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+.apikey-val{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);letter-spacing:0.05em;background:var(--bg-elevated);padding:3px 8px;border-radius:2px;}
+.action-link{font-family:var(--font-body);font-size:12px;color:var(--accent-frame-light);cursor:pointer;background:none;border:none;padding:0;display:inline;}
+.action-link:hover{color:var(--text-primary);}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);border:1px solid rgba(61,74,110,0.35);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);flex-shrink:0;}
+.user-cell{display:flex;align-items:center;gap:10px;}
+.phone-num{font-family:var(--font-mono);font-size:13px;color:var(--text-primary);letter-spacing:0.04em;}
+
+/* ─── Mobile bottom nav ──────────────────────────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(21,24,33,0.96); backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(61,74,110,0.25);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  justify-content: space-around;
+}
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 8px; min-width: 44px; min-height: 44px; justify-content: center;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+}
+.mobile-nav-item.active { color: var(--accent-orb); }
+.mobile-nav-icon { font-size: 16px; opacity: 0.55; }
+.mobile-nav-item.active .mobile-nav-icon { opacity: 1; }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+  .admin-main { padding-bottom: 72px; }
+  .login-layout { grid-template-columns: 1fr; }
+  .login-left { display: none; }
+  .login-right { padding: 40px 24px; border-left: none; }
+  .onboard-layout { grid-template-columns: 1fr; }
+  .onboard-left { display: none; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .session-cards { grid-template-columns: 1fr; }
+  .settings-col-layout { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .orb-canvas-wrap { width: 280px; height: 280px; }
+  .wave-ring-1,.wave-ring-2,.wave-ring-3 { width: 280px; height: 280px; }
+  .mobile-bottom-nav { display: flex; }
+  .orb-chrome-top { padding: 12px 20px; }
+  .orb-chrome-bottom { padding: 12px 20px 68px; }
+  .orb-brand { min-width: 0; gap: 10px; }
+  .orb-brand-name { font-size: 16px; }
+  .conv-log { display: none; }
+}
+@media (max-width: 480px) {
+  .orb-canvas-wrap { width: 240px; height: 240px; }
+  .wave-ring-1,.wave-ring-2,.wave-ring-3 { width: 240px; height: 240px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ripple-ring, .lotus-outer-glow, .lotus-outer-ring, .lotus-mid-ring,
+  .lotus-inner-ring, .lotus-center-ring, .wave-ring { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────────────────────── -->
+<div class="screen screen-login" id="screen-login">
+  <div class="login-layout">
+    <div class="login-left">
+      <svg class="login-lotus-mark" viewBox="-50 -50 100 100" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lm-bg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#c87040" stop-opacity="0.50"/>
+            <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="0" cy="0" r="48" fill="url(#lm-bg)"/>
+        <g opacity="0.78">
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(0) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(45) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(90) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(135) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(180) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(225) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(270) translate(0,-16)"/>
+          <path d="M0,0 C7,-3 4,-18 0,-26 C-4,-18 -7,-3 0,0" fill="#9a5838" transform="rotate(315) translate(0,-16)"/>
+        </g>
+        <g opacity="0.88">
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(22.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(67.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(112.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(157.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(202.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(247.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(292.5) translate(0,-10)"/>
+          <path d="M0,0 C5,-2 3,-12 0,-18 C-3,-12 -5,-2 0,0" fill="#b87050" transform="rotate(337.5) translate(0,-10)"/>
+        </g>
+        <circle cx="0" cy="0" r="7" fill="#e8b840" opacity="0.9"/>
+        <circle cx="0" cy="0" r="4" fill="#f5cc50" opacity="0.95"/>
+        <circle cx="0" cy="0" r="1.5" fill="#fff8e0"/>
+      </svg>
+      <div class="login-brand">Sureline</div>
+      <div class="login-tagline">Enterprise Voice Agent</div>
+      <div class="login-copy">Your data. Your language.<br>Answered by voice, instantly.</div>
+      <div class="login-clients">
+        <div class="login-client-badge">HDFC Bank</div>
+        <div class="login-client-badge">Infosys</div>
+        <div class="login-client-badge">Reliance Retail</div>
+        <div class="login-client-badge">TCS</div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-form-title">Welcome back</div>
+      <div class="login-form-sub">Sign in to manage your deployment</div>
+      <button class="btn-sso" id="btnSso">
+        <span class="btn-sso-glyph">G</span>
+        Continue with Google Workspace
+      </button>
+      <div class="login-divider"><span>or sign in with email</span></div>
+      <div class="form-group">
+        <label class="input-label">Work Email</label>
+        <input class="input-field" id="loginEmail" type="email" placeholder="you@company.com">
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password</label>
+        <input class="input-field" id="loginPassword" type="password" placeholder="••••••••">
+      </div>
+      <div class="login-row">
+        <label class="login-remember">
+          <input type="checkbox" checked style="accent-color:var(--accent-orb)"> Remember me
+        </label>
+        <a class="login-forgot">Forgot password?</a>
+      </div>
+      <button class="btn-primary" id="btnLogin" style="width:100%;padding:12px 20px">Sign in &rarr;</button>
+      <div class="login-footer">New deployment? <a onclick="navigate('onboard')">Contact Sureline sales</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VOICE ORB (primary) ────────────────────────────────────────────────────── -->
+<div class="screen screen-orb" id="screen-orb">
+  <div class="alpona-bg" id="alponaBg"></div>
+  <div class="grain-overlay"></div>
+  <div class="alpona-border-top"    id="alponaBorderTop"></div>
+  <div class="alpona-border-bottom" id="alponaBorderBottom"></div>
+  <div class="alpona-border-left"   id="alponaBorderLeft"></div>
+  <div class="alpona-border-right"  id="alponaBorderRight"></div>
+
+  <div class="orb-chrome-top">
+    <div class="orb-brand">
+      <span class="orb-brand-name">Sureline</span>
+      <button class="orb-back-link" onclick="navigate('admin')">&#8592; Dashboard</button>
+    </div>
+    <div class="orb-live-badge">
+      <div class="orb-live-dot"></div>
+      <span id="liveLabel">Live Session</span>
+    </div>
+    <div class="orb-session-info" id="sessionInfo">-- : -- : -- &nbsp;&middot;&nbsp; --</div>
+  </div>
+
+  <div class="orb-center">
+    <div class="orb-canvas-wrap" data-state="idle" id="orbWrap">
+      <div class="wave-ring wave-ring-1"></div>
+      <div class="wave-ring wave-ring-2"></div>
+      <div class="wave-ring wave-ring-3"></div>
+      <svg class="lotus-svg" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="lotusGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#c87040" stop-opacity="0.62"/>
+            <stop offset="45%"  stop-color="#a05020" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#e8b840"/>
+            <stop offset="60%"  stop-color="#c49a2a"/>
+            <stop offset="100%" stop-color="#8a6a1a"/>
+          </radialGradient>
+          <linearGradient id="gradOuter" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stop-color="#7a3828" stop-opacity="0.96"/>
+            <stop offset="100%" stop-color="#d08058" stop-opacity="0.52"/>
+          </linearGradient>
+          <linearGradient id="gradMid" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stop-color="#9a4e38" stop-opacity="0.93"/>
+            <stop offset="100%" stop-color="#e09070" stop-opacity="0.58"/>
+          </linearGradient>
+          <linearGradient id="gradInner" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stop-color="#b86a4e" stop-opacity="0.94"/>
+            <stop offset="100%" stop-color="#eeaa88" stop-opacity="0.60"/>
+          </linearGradient>
+          <linearGradient id="gradCenterPetals" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stop-color="#c47a5a" stop-opacity="0.90"/>
+            <stop offset="100%" stop-color="#f8c0b0" stop-opacity="0.60"/>
+          </linearGradient>
+          <radialGradient id="coronaGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#c87040" stop-opacity="0.0"/>
+            <stop offset="55%"  stop-color="#8a4020" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#0d0f14" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="gradRay" x1="0" y1="1" x2="0" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stop-color="#a05828" stop-opacity="0.82"/>
+            <stop offset="100%" stop-color="#e8a860" stop-opacity="0.12"/>
+          </linearGradient>
+          <filter id="petalShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#1a0800" flood-opacity="0.55"/>
+          </filter>
+        </defs>
+        <circle cx="0" cy="0" r="195" fill="url(#coronaGlow)"/>
+        <circle cx="0" cy="0" r="170" fill="url(#bgGlow)"/>
+        <g>
+          <circle cx="0" cy="0" r="188" fill="none" stroke="#dcd5c5" stroke-width="0.3"  stroke-opacity="0.030" stroke-dasharray="4 9"/>
+          <circle cx="0" cy="0" r="170" fill="none" stroke="#dcd5c5" stroke-width="0.4"  stroke-opacity="0.055"/>
+          <circle cx="0" cy="0" r="154" fill="none" stroke="#dcd5c5" stroke-width="0.3"  stroke-opacity="0.045" stroke-dasharray="3 6"/>
+          <circle cx="0" cy="0" r="133" fill="none" stroke="#dcd5c5" stroke-width="0.25" stroke-opacity="0.038" stroke-dasharray="2 5"/>
+          <circle cx="0" cy="0" r="114" fill="none" stroke="#dcd5c5" stroke-width="0.35" stroke-opacity="0.060"/>
+          <circle cx="0" cy="0" r="96"  fill="none" stroke="#c9a070" stroke-width="0.25" stroke-opacity="0.08"  stroke-dasharray="1.5 4"/>
+          <circle cx="0" cy="0" r="78"  fill="none" stroke="#c9a070" stroke-width="0.3"  stroke-opacity="0.14"/>
+        </g>
+        <g stroke="#dcd5c5" stroke-width="0.3" stroke-opacity="0.042">
+          <line x1="0" y1="-188" x2="0"   y2="188"/>
+          <line x1="-188" y1="0" x2="188" y2="0"/>
+          <line x1="-133" y1="-133" x2="133" y2="133"/>
+          <line x1="133"  y1="-133" x2="-133" y2="133"/>
+        </g>
+        <g stroke="#dcd5c5" stroke-width="0.22" stroke-opacity="0.024">
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(22.5)"/>
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(45)"/>
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(67.5)"/>
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(112.5)"/>
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(135)"/>
+          <line x1="0" y1="-188" x2="0" y2="188" transform="rotate(157.5)"/>
+        </g>
+        <g class="lotus-outer-glow" opacity="0.38" filter="url(#petalShadow)"><g id="rayPetals"></g></g>
+        <g class="lotus-outer-ring" opacity="0.72" filter="url(#petalShadow)"><g id="outerPetals"></g></g>
+        <g class="lotus-mid-ring"   opacity="0.84" filter="url(#petalShadow)"><g id="midPetals"></g></g>
+        <g class="lotus-inner-ring" opacity="0.92" filter="url(#petalShadow)"><g id="innerPetals"></g></g>
+        <g class="lotus-center-ring" opacity="0.95"><g id="centerPetals"></g></g>
+        <g opacity="0.38">
+          <circle cx="0" cy="0" r="70" fill="none" stroke="#c47a8a" stroke-width="0.4" stroke-opacity="0.45"/>
+          <circle cx="0" cy="0" r="67" fill="none" stroke="#c9a070" stroke-width="0.25" stroke-opacity="0.38" stroke-dasharray="2 4"/>
+        </g>
+        <g id="veins" opacity="0.25"></g>
+        <g class="lotus-outer-glow" filter="url(#lotusGlow)">
+          <circle cx="0" cy="0" r="24" fill="url(#centerGrad)" opacity="0.9"/>
+          <circle cx="0" cy="0" r="18" fill="#e8b840" opacity="0.7"/>
+          <circle cx="0" cy="0" r="10" fill="#f5cc50" opacity="0.9"/>
+          <circle cx="0" cy="0" r="4"  fill="#fff8e0" opacity="0.95"/>
+          <circle cx="0"  cy="-14" r="2" fill="#c49a2a" opacity="0.8"/>
+          <circle cx="12.1" cy="7" r="2" fill="#c49a2a" opacity="0.8"/>
+          <circle cx="-12.1" cy="7" r="2" fill="#c49a2a" opacity="0.8"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="orb-status"     id="orbStatus">At rest</div>
+    <div class="orb-transcript" id="orbTranscript" data-pretext>Sureline is ready. Begin speaking to activate the session.</div>
+  </div>
+
+  <div class="orb-chrome-bottom">
+    <div class="orb-meta">
+      Latency: <span class="latency" id="latencyDisplay" style="color:var(--accent-data)">--</span>
+      &nbsp;&middot;&nbsp;
+      <span id="modelDisplay">Gemini Flash</span>
+      &nbsp;&middot;&nbsp;
+      STT: <span id="sttDisplay">Groq Whisper</span>
+    </div>
+    <button class="orb-end-btn" id="endSessionBtn">End Session</button>
+  </div>
+
+  <!-- Conversation log panel — right side debug overlay -->
+  <div class="conv-log" id="convLog">
+    <div class="conv-log-header">Conversation Log</div>
+    <div class="conv-log-body" id="convLogBody"></div>
+  </div>
+</div>
+
+<!-- ── ADMIN DASHBOARD ─────────────────────────────────────────────────────────── -->
+<div class="screen screen-admin" id="screen-admin">
+  <div class="admin-shell">
+          <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header">
+        <div class="admin-title" id="adminGreeting">Good afternoon</div>
+        <span id="dashStatusDot" class="badge badge-neutral"><span>&#9679;</span> <span id="dashStatus">Idle</span></span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="dashQueries">0</div>
+          <div class="stat-label">Queries this session</div>
+          <div class="stat-delta" style="color:var(--text-muted)">resets on page load</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="dashLatency">--</div>
+          <div class="stat-label">Avg Latency</div>
+          <div class="stat-delta" style="color:var(--text-muted)">target &lt; 2.0s</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="dashClient">--</div>
+          <div class="stat-label">Active client</div>
+          <div class="stat-delta" style="color:var(--text-muted)">from pipeline</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="dashModel">--</div>
+          <div class="stat-label">LLM</div>
+          <div class="stat-delta" style="color:var(--text-muted)">from config</div>
+        </div>
+      </div>
+      <div class="card" style="padding:20px 24px">
+        <p style="font-family:var(--font-body);font-size:13px;color:var(--text-muted);line-height:1.7">
+          Start the pipeline with <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-elevated);padding:2px 6px;border-radius:3px">python start.py</code> to see live session data.
+          Stats above update in real time from the WebSocket connection.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DATA SETUP ─────────────────────────────────────────────────────────────── -->
+<div class="screen screen-data" id="screen-data">
+  <div class="admin-shell">
+          <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header">
+        <div class="admin-title">Data Sources</div>
+        <span class="badge badge-success"><span>&#9679;</span> 3 sources indexed</span>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:16px">Upload Documents</h3>
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">&#8679;</div>
+            <div class="upload-text">Drop files here or <strong>browse</strong></div>
+            <div class="upload-hint">PDF &middot; XLSX &middot; CSV &middot; DOCX &middot; up to 50MB</div>
+          </div>
+          <div class="file-list">
+            <div class="file-item"><div class="file-icon file-icon-sql">&#x2B21;</div><div class="file-name">customer_accounts.sql</div><div class="file-size">2.4 MB</div><div class="file-status ready">Indexed</div></div>
+            <div class="file-item"><div class="file-icon file-icon-xlsx">&#x229E;</div><div class="file-name">Q1_sales_report.xlsx</div><div class="file-size">890 KB</div><div class="file-status ready">Indexed</div></div>
+            <div class="file-item"><div class="file-icon file-icon-pdf">&#x2594;</div><div class="file-name">product_catalog_2026.pdf</div><div class="file-size">4.1 MB</div><div class="file-status processing">Embedding...</div></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:16px">Live Database</h3>
+          <div class="card">
+            <div class="form-group"><label class="input-label">Connection Type</label><select class="select-field"><option>PostgreSQL</option><option>MySQL</option><option>SQL Server</option><option>BigQuery</option></select></div>
+            <div class="form-group"><label class="input-label">Host / Connection String</label><input class="input-field" type="text" placeholder="postgres://host:5432/db"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="input-label">Username</label><input class="input-field" type="text" placeholder="sureline_ro"></div>
+              <div class="form-group"><label class="input-label">Password</label><input class="input-field" type="password" placeholder="••••••••"></div>
+            </div>
+            <div class="form-group"><label class="input-label">Allowed Tables</label><input class="input-field" type="text" placeholder="accounts, orders, products"></div>
+            <button class="btn-primary" style="width:100%">Test &amp; Connect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CALL HISTORY ────────────────────────────────────────────────────────────── -->
+<div class="screen screen-calls" id="screen-calls">
+  <div class="admin-shell">
+          <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">Session Log</div></div>
+      <div class="call-filters">
+        <div class="filter-chip active">All</div>
+        <div class="filter-chip">Completed</div>
+        <div class="filter-chip">Errors</div>
+        <div class="filter-chip">High Latency</div>
+        <div class="filter-chip">Today</div>
+        <div class="filter-chip">This Week</div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>Time</th><th>Session ID</th><th>Caller</th><th>Queries</th><th>Duration</th><th>Avg Latency</th><th>Cost</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:11px">14:32:07</td><td class="mono">SRL-0047</td><td>HDFC Bank Demo</td><td class="mono">4</td><td class="mono">3m 22s</td><td class="mono">1.24s</td><td class="mono" style="color:var(--accent-data)">&#8377;0.72</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+            <tr><td class="mono" style="font-size:11px">13:58:43</td><td class="mono">SRL-0046</td><td>Infosys HR Pilot</td><td class="mono">9</td><td class="mono">7m 41s</td><td class="mono">1.42s</td><td class="mono" style="color:var(--accent-data)">&#8377;1.84</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+            <tr><td class="mono" style="font-size:11px">13:21:15</td><td class="mono">SRL-0045</td><td>Reliance Retail</td><td class="mono">2</td><td class="mono">2m 05s</td><td class="mono" style="color:var(--accent-terra)">3.21s</td><td class="mono">&#8377;0.41</td><td><span class="badge badge-error" style="font-size:10px">Timeout</span></td></tr>
+            <tr><td class="mono" style="font-size:11px">12:44:31</td><td class="mono">SRL-0044</td><td>TCS Accounts</td><td class="mono">14</td><td class="mono">11m 18s</td><td class="mono">1.31s</td><td class="mono" style="color:var(--accent-data)">&#8377;2.87</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+            <tr><td class="mono" style="font-size:11px">11:02:58</td><td class="mono">SRL-0043</td><td>Wipro Demo</td><td class="mono">6</td><td class="mono">5m 12s</td><td class="mono">1.58s</td><td class="mono" style="color:var(--accent-data)">&#8377;1.12</td><td><span class="badge badge-success" style="font-size:10px">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ONBOARDING ─────────────────────────────────────────────────────────────── -->
+<div class="screen screen-onboard" id="screen-onboard">
+  <div class="admin-shell">
+          <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">New Deployment</div></div>
+      <div class="onboard-layout">
+        <div class="onboard-left">
+          <div class="onboard-left-title">Set up a new client deployment</div>
+          <div class="onboard-left-sub">Connect your data, configure the agent, and go live in under 20 minutes.</div>
+          <div class="onboard-step-list">
+            <div class="onboard-step"><div class="onboard-step-num done">&#10003;</div><div class="onboard-step-text done">Client profile</div></div>
+            <div class="onboard-step"><div class="onboard-step-num active">2</div><div class="onboard-step-text active">Data sources</div></div>
+            <div class="onboard-step"><div class="onboard-step-num pending">3</div><div class="onboard-step-text pending">Agent configuration</div></div>
+            <div class="onboard-step"><div class="onboard-step-num pending">4</div><div class="onboard-step-text pending">Voice &amp; telephony</div></div>
+            <div class="onboard-step"><div class="onboard-step-num pending">5</div><div class="onboard-step-text pending">Test call</div></div>
+          </div>
+        </div>
+        <div class="onboard-right">
+          <div class="onboard-progress">
+            <div class="progress-dot done"></div>
+            <div class="progress-dot active"></div>
+            <div class="progress-dot pending"></div>
+            <div class="progress-dot pending"></div>
+            <div class="progress-dot pending"></div>
+          </div>
+          <div class="onboard-form-title">Connect data sources</div>
+          <div class="onboard-form-sub">Step 2 of 5 &mdash; Choose what Sureline can query for this client</div>
+          <div class="form-group"><label class="input-label">Deployment Name</label><input class="input-field" type="text" placeholder="e.g. HDFC Bank — Account Enquiries"></div>
+          <div class="form-group"><label class="input-label">Primary Language</label>
+            <select class="select-field">
+              <option>English (India)</option><option>Hindi</option>
+              <option>Hinglish (Auto-detect)</option><option>Telugu</option><option>Tamil</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="input-label">STT Provider</label>
+              <select class="select-field"><option>Groq Whisper</option><option>Azure Speech</option><option>AssemblyAI</option></select>
+            </div>
+            <div class="form-group"><label class="input-label">TTS Provider</label>
+              <select class="select-field"><option>ElevenLabs</option><option>Azure TTS</option><option>Deepgram Aura</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button class="btn-secondary" style="flex:1" onclick="navigate('admin')">&#8592; Back</button>
+            <button class="btn-primary" style="flex:2">Continue: Connect Database &#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ── SESSIONS screen ───────────────────────────────────────── -->
+<div class="screen screen-sessions" id="screen-sessions">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header">
+        <div class="admin-title">Live Sessions</div>
+        <span id="liveSessionBadge" class="badge badge-neutral"><span>&#9679;</span> No active session</span>
+      </div>
+      <div id="liveSessionCard" class="session-card" style="display:none;margin-bottom:16px">
+        <div class="session-card-header">
+          <span class="session-id">This session</span>
+          <span class="badge badge-success" style="font-size:10px">&#9679; Live</span>
+        </div>
+        <div class="session-client" id="liveSessionClient">--</div>
+        <div class="session-stats">
+          <div><span class="session-stat-label">Queries</span><span class="session-stat-val" id="liveSessionQueries">0</span></div>
+          <div><span class="session-stat-label">Avg Latency</span><span class="session-stat-val" id="liveSessionLatency">--</span></div>
+          <div><span class="session-stat-label">Status</span><span class="session-stat-val" id="liveSessionState">Idle</span></div>
+        </div>
+        <button class="btn-secondary" style="width:100%;padding:8px;font-size:12px;margin-top:4px" onclick="navigate('orb')">Open Voice Agent</button>
+      </div>
+      <div id="liveSessionEmpty" class="card" style="padding:20px 24px">
+        <p style="font-family:var(--font-body);font-size:13px;color:var(--text-muted);line-height:1.7">
+          No session running. Start the pipeline with <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-elevated);padding:2px 6px;border-radius:3px">python start.py</code> — the session card will appear here automatically.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AGENT screen ───────────────────────────────────────── -->
+<div class="screen screen-agent" id="screen-agent">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">Agent Settings</div></div>
+      <div class="settings-col-layout">
+        <div>
+          <div class="settings-section">
+            <div class="settings-section-title">Active Stack</div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">LLM</span><span class="toggle-sub">Language model provider</span></div><span class="apikey-val" id="cfgLlm">--</span></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">STT</span><span class="toggle-sub">Speech-to-text provider</span></div><span class="apikey-val" id="cfgStt">--</span></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">TTS</span><span class="toggle-sub">Text-to-speech provider</span></div><span class="apikey-val" id="cfgTts">--</span></div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:14px;line-height:1.6">
+              Values are read from <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">.env</code> at pipeline start.
+              Change providers by editing <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">LLM_PROVIDER</code>, <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">TTS_PROVIDER</code> in <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">.env</code> and restarting.
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="settings-section">
+            <div class="settings-section-title">Capabilities</div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Barge-in</span><span class="toggle-sub">Caller can interrupt agent mid-sentence</span></div><label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Conversation log</span><span class="toggle-sub">Transcript panel on orb screen</span></div><label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">RAG retrieval</span><span class="toggle-sub">Query connected data sources</span></div><label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label></div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:14px;line-height:1.6">
+              Capabilities are compiled into the pipeline. Toggle via <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">pipeline.py</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VOICE screen ───────────────────────────────────────── -->
+<div class="screen screen-voice" id="screen-voice">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">Voice &amp; TTS</div></div>
+      <div class="settings-col-layout">
+        <div>
+          <div class="settings-section">
+            <div class="settings-section-title">Speech-to-Text</div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Provider</span><span class="toggle-sub">Active STT engine</span></div><span class="apikey-val" id="cfgSttBadge">--</span></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Barge-in VAD</span><span class="toggle-sub">Voice activity detection for interruptions</span></div><label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label></div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:14px;line-height:1.6">
+              Set <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">SARVAM_API_KEY</code> in <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">.env</code> to use Sarvam STT.
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="settings-section">
+            <div class="settings-section-title">Text-to-Speech</div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Provider</span><span class="toggle-sub">Active TTS engine</span></div><span class="apikey-val" id="cfgTtsBadge">--</span></div>
+            <div class="toggle-row"><div class="toggle-label-wrap"><span class="toggle-label">Streaming audio</span><span class="toggle-sub">Playback starts before synthesis completes</span></div><label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label></div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:14px;line-height:1.6">
+              Switch TTS by setting <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">TTS_PROVIDER=elevenlabs</code> (or <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">sarvam</code>) in <code style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);padding:1px 5px;border-radius:2px">.env</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TELEPHONY screen ───────────────────────────────────────── -->
+<div class="screen screen-telephony" id="screen-telephony">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">Telephony</div><button class="btn-primary" style="font-size:13px;padding:8px 18px">+ Add Number</button></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+        <div style="padding:14px 20px;border-bottom:1px solid rgba(61,74,110,0.2);font-size:13px;font-weight:500">Phone Numbers</div>
+        <table class="data-table">
+          <thead><tr><th>Number</th><th>Type</th><th>Status</th><th>Routing</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="phone-num">+91-800-SURE-LINE</span></td><td><span class="badge badge-neutral" style="font-size:10px">Inbound</span></td><td><span class="badge badge-success" style="font-size:10px">&#9679; Active</span></td><td style="color:var(--text-muted);font-size:13px">Main IVR Flow</td><td><button class="action-link" style="margin-right:12px">Configure</button><button class="action-link" style="color:var(--accent-terra)">Release</button></td></tr>
+            <tr><td><span class="phone-num">+91-800-SURE-0002</span></td><td><span class="badge badge-neutral" style="font-size:10px">Outbound</span></td><td><span class="badge badge-warning" style="font-size:10px">Testing</span></td><td style="color:var(--text-muted);font-size:13px">Callback Flow</td><td><button class="action-link" style="margin-right:12px">Configure</button><button class="action-link" style="color:var(--accent-terra)">Release</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="settings-section-title" style="font-size:16px">Business Hours</div>
+          <table class="data-table" style="margin-top:8px">
+            <thead><tr><th>Day</th><th>Open</th><th>Close</th><th>Active</th></tr></thead>
+            <tbody>
+              <tr><td>Monday</td><td class="mono">09:00</td><td class="mono">18:00</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Tuesday</td><td class="mono">09:00</td><td class="mono">18:00</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Wednesday</td><td class="mono">09:00</td><td class="mono">18:00</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Thursday</td><td class="mono">09:00</td><td class="mono">18:00</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Friday</td><td class="mono">09:00</td><td class="mono">18:00</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Saturday</td><td class="mono">10:00</td><td class="mono">14:00</td><td><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></td></tr>
+              <tr><td>Sunday</td><td class="mono">--</td><td class="mono">--</td><td><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">Timezone: Asia/Kolkata (IST)</div>
+        </div>
+        <div class="card">
+          <div class="settings-section-title" style="font-size:16px">After Hours</div>
+          <div class="toggle-row" style="margin-bottom:16px"><div class="toggle-label-wrap"><span class="toggle-label">Enable voicemail</span><span class="toggle-sub">Capture messages outside business hours</span></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="form-group"><label class="input-label">After-Hours Message</label><textarea class="textarea-field">Thank you for calling Sureline. Our team is currently unavailable. Business hours are Monday to Friday, 9 AM to 6 PM IST. Please leave a message and we will return your call.</textarea></div>
+          <div class="form-group"><label class="input-label">Emergency Escalation</label><input class="input-field" type="text" placeholder="+91-98765-43210 (optional)"></div>
+          <button class="btn-primary" style="width:100%">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APIKEYS screen ───────────────────────────────────────── -->
+<div class="screen screen-apikeys" id="screen-apikeys">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">API Keys</div><button class="btn-primary" style="font-size:13px;padding:8px 18px">+ Generate New Key</button></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Key Prefix</th><th>Created</th><th>Last Used</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500">Production Key</td><td><span class="apikey-val">sk-prod-&#x2022;&#x2022;&#x2022;&#x2022;3f2a</span></td><td class="mono" style="font-size:11px">2026-01-14</td><td class="mono" style="font-size:11px">2026-04-14</td><td><span class="badge badge-success" style="font-size:10px">Active</span></td><td><button class="action-link" style="margin-right:12px">Rotate</button><button class="action-link" style="color:var(--accent-terra)">Revoke</button></td></tr>
+            <tr><td style="font-weight:500">Staging Key</td><td><span class="apikey-val">sk-stag-&#x2022;&#x2022;&#x2022;&#x2022;8c71</span></td><td class="mono" style="font-size:11px">2026-02-20</td><td class="mono" style="font-size:11px">2026-04-12</td><td><span class="badge badge-success" style="font-size:10px">Active</span></td><td><button class="action-link" style="margin-right:12px">Rotate</button><button class="action-link" style="color:var(--accent-terra)">Revoke</button></td></tr>
+            <tr><td style="font-weight:500">Dev / Testing</td><td><span class="apikey-val">sk-dev-&#x2022;&#x2022;&#x2022;&#x2022;1e0d</span></td><td class="mono" style="font-size:11px">2026-03-05</td><td class="mono" style="font-size:11px">2026-04-09</td><td><span class="badge badge-warning" style="font-size:10px">Rate Limited</span></td><td><button class="action-link" style="margin-right:12px">Rotate</button><button class="action-link" style="color:var(--accent-terra)">Revoke</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="display:flex;gap:16px;align-items:flex-start">
+        <div style="font-size:20px;opacity:0.5;flex-shrink:0;padding-top:2px">&#x26A0;</div>
+        <div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Keep your API keys secure</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">Never expose keys in client-side code or public repositories. Use environment variables. Keys shown above are masked &mdash; use Rotate to generate a replacement if a key is compromised.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── USERS screen ───────────────────────────────────────── -->
+<div class="screen screen-users" id="screen-users">
+  <div class="admin-shell">
+      <div class="admin-sidebar">
+      <!-- sidebar: JS-rendered -->
+      </div>
+    <div class="admin-main">
+      <div class="admin-header"><div class="admin-title">Users</div><button class="btn-primary" style="font-size:13px;padding:8px 18px">+ Invite User</button></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+        <table class="data-table">
+          <thead><tr><th>User</th><th>Role</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div class="user-cell"><div class="avatar">SA</div><div><div style="font-size:13px;color:var(--text-primary)">subhadeep@sureline.ai</div><div style="font-size:11px;color:var(--text-muted)">Subhadeep M.</div></div></div></td><td><span class="badge badge-neutral" style="font-size:10px">Admin</span></td><td class="mono" style="font-size:11px">2026-04-14 14:30</td><td><span class="badge badge-success" style="font-size:10px">&#9679; Active</span></td><td><button class="action-link" style="margin-right:12px">Edit</button><button class="action-link" style="color:var(--accent-terra);opacity:0.4;cursor:not-allowed">Remove</button></td></tr>
+            <tr><td><div class="user-cell"><div class="avatar">RK</div><div><div style="font-size:13px;color:var(--text-primary)">rohan.k@hdfcbank.com</div><div style="font-size:11px;color:var(--text-muted)">Rohan Kumar</div></div></div></td><td><span class="badge badge-neutral" style="font-size:10px">Operator</span></td><td class="mono" style="font-size:11px">2026-04-13 09:15</td><td><span class="badge badge-success" style="font-size:10px">&#9679; Active</span></td><td><button class="action-link" style="margin-right:12px">Edit</button><button class="action-link" style="color:var(--accent-terra)">Remove</button></td></tr>
+            <tr><td><div class="user-cell"><div class="avatar">PM</div><div><div style="font-size:13px;color:var(--text-primary)">priya.m@infosys.com</div><div style="font-size:11px;color:var(--text-muted)">Priya Menon</div></div></div></td><td><span class="badge badge-neutral" style="font-size:10px">Viewer</span></td><td class="mono" style="font-size:11px">2026-04-10 17:22</td><td><span class="badge badge-warning" style="font-size:10px">Pending</span></td><td><button class="action-link" style="margin-right:12px">Edit</button><button class="action-link" style="color:var(--accent-terra)">Remove</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:500;margin-bottom:16px">Role Permissions</div>
+        <table class="data-table">
+          <thead><tr><th>Permission</th><th>Admin</th><th>Operator</th><th>Viewer</th></tr></thead>
+          <tbody>
+            <tr><td>View dashboards &amp; sessions</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--accent-data)">&#10003;</td></tr>
+            <tr><td>Manage data sources</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--text-muted)">&#8212;</td></tr>
+            <tr><td>Configure agent &amp; voice</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--text-muted)">&#8212;</td></tr>
+            <tr><td>Manage API keys &amp; telephony</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--text-muted)">&#8212;</td><td style="color:var(--text-muted)">&#8212;</td></tr>
+            <tr><td>Invite &amp; manage users</td><td style="color:var(--accent-data)">&#10003;</td><td style="color:var(--text-muted)">&#8212;</td><td style="color:var(--text-muted)">&#8212;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Mobile bottom nav ──────────────────────────────────────────────────────── -->
+<nav class="mobile-bottom-nav" id="mobileNav">
+  <div class="mobile-nav-item" id="mobileNavAdmin" onclick="mobileNav('admin',this)">
+    <span class="mobile-nav-icon">⊞</span><span>Monitor</span>
+  </div>
+  <div class="mobile-nav-item active" id="mobileNavOrb" onclick="mobileNav('orb',this)">
+    <span class="mobile-nav-icon">◎</span><span>Agent</span>
+  </div>
+  <div class="mobile-nav-item" id="mobileNavData" onclick="mobileNav('data',this)">
+    <span class="mobile-nav-icon">⬡</span><span>Data</span>
+  </div>
+  <div class="mobile-nav-item" id="mobileNavOnboard" onclick="mobileNav('onboard',this)">
+    <span class="mobile-nav-icon">⊕</span><span>Setup</span>
+  </div>
+</nav>
+
+<!-- ── Dev state controls (hidden by default — append ?dev=1 to URL) ─────────── -->
+<div class="dev-controls" id="devControls" style="display:none">
+  <button class="state-btn active" onclick="SurelineOrb.setState('idle',this)">Idle</button>
+  <button class="state-btn" onclick="SurelineOrb.setState('listening',this)">Listening</button>
+  <button class="state-btn" onclick="SurelineOrb.setState('processing',this)">Processing</button>
+  <button class="state-btn" onclick="SurelineOrb.setState('speaking',this)">Speaking</button>
+  <button class="state-btn" onclick="SurelineOrb.setState('error',this)">Error</button>
+</div>
+
+<script type="module">
+// ─── Pretext import ────────────────────────────────────────────────────────────
+import { prepare, layout } from 'https://esm.sh/@chenglou/pretext';
+// VENDOR ALTERNATIVE: replace with vendored copy for zero-network dependency:
+// const { prepare, layout } = (await import('./pretext.js')).default
+
+// ─── SVG helpers ──────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+const C  = '#e4dcc8'; // chalk off-white, warm
+function mk(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function sd(deg) { return Math.sin(deg * Math.PI / 180); }
+function cd(deg) { return Math.cos(deg * Math.PI / 180); }
+function mkSvg(vb) {
+  const s = document.createElementNS(NS, 'svg');
+  s.setAttribute('viewBox', vb);
+  s.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  return s;
+}
+
+// ─── Alpona drawing primitives ─────────────────────────────────────────────────
+function scallopyRing(g, cx, cy, R, N, sr, fo, so, sw) {
+  g.appendChild(mk('circle',{cx,cy,r:R,fill:'none',stroke:C,'stroke-width':sw||0.6,'stroke-opacity':so||0.14}));
+  g.appendChild(mk('circle',{cx,cy,r:R-sr*0.6,fill:'none',stroke:C,'stroke-width':(sw||0.6)*0.5,'stroke-opacity':(so||0.14)*0.6}));
+  for (let i=0;i<N;i++){
+    const a=i*(360/N);
+    const bx=cx+R*sd(a), by=cy-R*cd(a);
+    g.appendChild(mk('circle',{cx:bx.toFixed(2),cy:by.toFixed(2),r:sr,fill:C,'fill-opacity':fo||0.10,stroke:C,'stroke-width':(sw||0.6)*0.4,'stroke-opacity':(so||0.14)*0.8}));
+  }
+}
+function petalRing(g, cx, cy, R, N, hw, len, fo, offset=0) {
+  for (let i=0;i<N;i++){
+    const a=i*(360/N)+offset;
+    const h1=len*0.22,h2=len*0.70;
+    const d=`M 0,0 C ${hw},${-h1.toFixed(1)} ${(hw*0.55).toFixed(1)},${-h2.toFixed(1)} 0,${-len} C ${-(hw*0.55).toFixed(1)},${-h2.toFixed(1)} ${-hw},${-h1.toFixed(1)} 0,0 Z`;
+    g.appendChild(mk('path',{d,fill:C,'fill-opacity':fo||0.10,stroke:C,'stroke-width':'0.3','stroke-opacity':(fo||0.10)*0.7,transform:`rotate(${a},${cx},${cy}) translate(${cx},${cy-R})`}));
+  }
+}
+function diamondRing(g, cx, cy, R, N, sz, fo, offset=0) {
+  for (let i=0;i<N;i++){
+    const a=i*(360/N)+offset;
+    const px=cx+R*sd(a),py=cy-R*cd(a);
+    g.appendChild(mk('rect',{x:(px-sz).toFixed(1),y:(py-sz).toFixed(1),width:sz*2,height:sz*2,fill:C,'fill-opacity':fo||0.12,transform:`rotate(45,${px.toFixed(1)},${py.toFixed(1)})`}));
+  }
+}
+function dotRing(g, cx, cy, R, N, r, fo, offset=0) {
+  for (let i=0;i<N;i++){
+    const a=i*(360/N)+offset;
+    const px=cx+R*sd(a),py=cy-R*cd(a);
+    g.appendChild(mk('circle',{cx:px.toFixed(1),cy:py.toFixed(1),r,fill:C,'fill-opacity':fo||0.13}));
+  }
+}
+function paisley(g, cx, cy, R, a, scale, fo) {
+  const len=26*scale,hw=8*scale,h1=len*0.28,h2=len*0.72;
+  const d=`M 0,2 C ${hw},${-h1.toFixed(1)} ${(hw*0.6).toFixed(1)},${-h2.toFixed(1)} 0,${-len} C ${-(hw*0.6).toFixed(1)},${-h2.toFixed(1)} ${-hw},${-h1.toFixed(1)} 0,2 Z`;
+  g.appendChild(mk('path',{d,fill:C,'fill-opacity':fo||0.13,stroke:C,'stroke-width':'0.35','stroke-opacity':(fo||0.13)*0.8,transform:`rotate(${a},${cx},${cy}) translate(${cx},${cy-R})`}));
+  const tipR=R+len+2*scale;
+  g.appendChild(mk('circle',{cx:(cx+tipR*sd(a)).toFixed(1),cy:(cy-tipR*cd(a)).toFixed(1),r:(1.6*scale).toFixed(1),fill:C,'fill-opacity':((fo||0.13)*1.2).toFixed(3)}));
+}
+function miniRosette(g, cx, cy, pr, N=8, fo=0.12) {
+  for (let i=0;i<N;i++){
+    const a=i*(360/N),px=cx+pr*sd(a)*0.5,py=cy-pr*cd(a)*0.5;
+    g.appendChild(mk('circle',{cx:px.toFixed(1),cy:py.toFixed(1),r:(pr*0.55).toFixed(1),fill:C,'fill-opacity':fo,stroke:C,'stroke-width':'0.35','stroke-opacity':fo*0.8}));
+  }
+  g.appendChild(mk('circle',{cx,cy,r:(pr*0.35).toFixed(1),fill:C,'fill-opacity':(fo*1.4).toFixed(3)}));
+}
+function starburst(g, cx, cy, r1, r2, N=8, so=0.12) {
+  for (let i=0;i<N;i++){
+    const a=i*(360/N);
+    g.appendChild(mk('line',{x1:(cx+r1*sd(a)).toFixed(1),y1:(cy-r1*cd(a)).toFixed(1),x2:(cx+r2*sd(a)).toFixed(1),y2:(cy-r2*cd(a)).toFixed(1),stroke:C,'stroke-width':'0.4','stroke-opacity':so}));
+  }
+}
+
+// ─── Alpona generator ──────────────────────────────────────────────────────────
+function initAlpona() {
+  const container = document.getElementById('alponaBg');
+  if (!container) return;
+  const svg = mkSvg('-700 -450 1400 900');
+  const root = document.createElementNS(NS, 'g');
+  svg.appendChild(root);
+
+  // Helper: create ripple group (pure scale-breathe, phase-offset)
+  function rg(delay) {
+    const gr = document.createElementNS(NS, 'g');
+    gr.setAttribute('class', 'ripple-ring');
+    gr.style.animation = 'rippleScale 8s ease-in-out infinite';
+    gr.style.animationDelay = (-delay).toFixed(2) + 's';
+    root.appendChild(gr);
+    return gr;
+  }
+
+  // Static layer: radial tracery (does not ripple)
+  const st = document.createElementNS(NS, 'g');
+  root.appendChild(st);
+  for (let i=0;i<8;i++) st.appendChild(mk('line',{x1:'200',y1:'0',x2:'690',y2:'0',stroke:C,'stroke-width':'0.22','stroke-opacity':'0.04',transform:`rotate(${i*45})`}));
+  for (let i=0;i<16;i++) st.appendChild(mk('line',{x1:'220',y1:'0',x2:'520',y2:'0',stroke:C,'stroke-width':'0.15','stroke-opacity':'0.028',transform:`rotate(${i*22.5})`}));
+
+  // Ring 1 — r=228, delay 0s
+  const r1=rg(0);
+  scallopyRing(r1,0,0,228,24,7,0.11,0.14,0.55); petalRing(r1,0,0,228,24,6,18,0.09,7.5); dotRing(r1,0,0,208,24,2,0.12,7.5);
+  // Ring 2 — r=272, delay 1.14s
+  const r2=rg(1.14);
+  r2.appendChild(mk('circle',{cx:'0',cy:'0',r:'272',fill:'none',stroke:C,'stroke-width':'0.4','stroke-opacity':'0.08'}));
+  r2.appendChild(mk('circle',{cx:'0',cy:'0',r:'264',fill:'none',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05','stroke-dasharray':'2 4'}));
+  dotRing(r2,0,0,272,32,1.8,0.10,0); dotRing(r2,0,0,272,32,1.0,0.08,5.625);
+  // Ring 3 — r=312, delay 2.28s
+  const r3=rg(2.28);
+  scallopyRing(r3,0,0,312,32,6.5,0.12,0.16,0.65); petalRing(r3,0,0,312,16,8,24,0.11,5.625); diamondRing(r3,0,0,298,32,2.2,0.10,5.625); dotRing(r3,0,0,327,32,1.5,0.09,0);
+  starburst(r3,0,0,315,355,8,0.07);
+  for (let i=0;i<8;i++) r3.appendChild(mk('circle',{cx:(355*sd(i*45)).toFixed(1),cy:(-355*cd(i*45)).toFixed(1),r:'3.5',fill:C,'fill-opacity':'0.10'}));
+  // Ring 4 — r=368, delay 3.42s
+  const r4=rg(3.42);
+  r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'368',fill:'none',stroke:C,'stroke-width':'0.6','stroke-opacity':'0.13'}));
+  r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'358',fill:'none',stroke:C,'stroke-width':'0.35','stroke-opacity':'0.07'}));
+  r4.appendChild(mk('circle',{cx:'0',cy:'0',r:'378',fill:'none',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05','stroke-dasharray':'1.5 3.5'}));
+  petalRing(r4,0,0,368,24,7,20,0.10,7.5); petalRing(r4,0,0,368,24,4,12,0.07,0); dotRing(r4,0,0,368,48,1.4,0.09,3.75); dotRing(r4,0,0,388,48,1.0,0.07,7.5);
+  // Ring 5 — r=418, delay 4.56s
+  const r5=rg(4.56);
+  scallopyRing(r5,0,0,418,40,5.5,0.10,0.13,0.55);
+  for (let i=0;i<16;i++) paisley(r5,0,0,418,i*22.5,1.0,0.12);
+  dotRing(r5,0,0,418,40,1.3,0.08,4.5); dotRing(r5,0,0,435,40,0.9,0.06,0);
+  // Ring 6 — r=468, delay 5.7s
+  const r6=rg(5.7);
+  [464,468,474].forEach((r,j)=>r6.appendChild(mk('circle',{cx:'0',cy:'0',r,fill:'none',stroke:C,'stroke-width':[0.3,0.55,0.22][j],'stroke-opacity':[0.06,0.12,0.05][j]})));
+  dotRing(r6,0,0,468,48,1.6,0.09,3.75); petalRing(r6,0,0,468,24,6,16,0.08,0);
+  [0,45,90,135,180,225,270,315].forEach((a,j)=>{
+    const pr=468,mx=pr*sd(a),my=-pr*cd(a);
+    j%2===0 ? miniRosette(r6,mx,my,9,6,0.10) : miniRosette(r6,mx,my,7,6,0.08);
+  });
+  // Ring 7 — r=522, delay 6.84s
+  const r7=rg(6.84);
+  scallopyRing(r7,0,0,522,48,5.0,0.09,0.11,0.5); petalRing(r7,0,0,522,32,5,14,0.07,5.625); dotRing(r7,0,0,540,48,1.2,0.07,3.75);
+  // Outer clusters — delay 7.98s
+  const rOut=rg(7.98);
+  [0,90,180,270].forEach(base=>{
+    [-10,0,10].forEach(spread=>paisley(rOut,0,0,490,base+spread,1.3,0.10));
+    const cr=540;
+    miniRosette(rOut,cr*sd(base),-cr*cd(base),10,8,0.11);
+  });
+  [45,135,225,315].forEach(a=>{
+    const dr=510,mx=dr*sd(a),my=-dr*cd(a);
+    [14,10,6].forEach((r,j)=>rOut.appendChild(mk('circle',{cx:mx.toFixed(1),cy:my.toFixed(1),r,fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':[0.12,0.10,0.09][j]})));
+    dotRing(rOut,mx,my,14,12,1.4,0.10,0);
+    rOut.appendChild(mk('circle',{cx:mx.toFixed(1),cy:my.toFixed(1),r:'3',fill:C,'fill-opacity':'0.14'}));
+    starburst(rOut,mx,my,6,16,8,0.09);
+  });
+  // Static vines
+  [0,90,180,270].forEach(base=>{
+    st.appendChild(mk('path',{d:'M 0,-538 Q 16,-568 -4,-600 Q -20,-632 6,-665 Q 18,-690 0,-710',fill:'none',stroke:C,'stroke-width':'0.5','stroke-opacity':'0.06',transform:`rotate(${base})`}));
+    [{y:-555,x:14,r:20},{y:-615,x:-16,r:-22},{y:-672,x:12,r:18}].forEach(lf=>{
+      st.appendChild(mk('path',{d:'M 0,0 C 4,-3 5,-11 0,-17 C -5,-11 -4,-3 0,0 Z',fill:C,'fill-opacity':'0.07',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.05',transform:`rotate(${base}) translate(${lf.x},${lf.y}) rotate(${lf.r})`}));
+    });
+  });
+  container.appendChild(svg);
+
+  // ── Bottom border band ──────────────────────────────────────────────────────
+  const btm = document.getElementById('alponaBorderBottom');
+  if (btm) {
+    const bsvg = document.createElementNS(NS,'svg');
+    bsvg.setAttribute('viewBox','0 0 1400 80');
+    bsvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    bsvg.style.width='100%'; bsvg.style.height='100%';
+    const bg = document.createElementNS(NS,'g');
+    bsvg.appendChild(bg);
+    [[0,'line',{x1:'0',y1:'8',x2:'1400',y2:'8',stroke:C,'stroke-width':'0.6','stroke-opacity':'0.18'}],
+     [0,'line',{x1:'0',y1:'12',x2:'1400',y2:'12',stroke:C,'stroke-width':'0.3','stroke-opacity':'0.10'}],
+     [0,'line',{x1:'0',y1:'74',x2:'1400',y2:'74',stroke:C,'stroke-width':'0.5','stroke-opacity':'0.15'}],
+     [0,'line',{x1:'0',y1:'78',x2:'1400',y2:'78',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.09'}]
+    ].forEach(([,tag,attrs])=>bg.appendChild(mk(tag,attrs)));
+    const spacing=100,count=15;
+    for (let j=0;j<count;j++){
+      const bx=spacing*0.5+j*spacing, by=42;
+      if (j<count-1){
+        const nx=bx+spacing;
+        bg.appendChild(mk('path',{d:`M ${bx+22},${by} Q ${bx+spacing*0.5},${by-14} ${nx-22},${by}`,fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':'0.12'}));
+        bg.appendChild(mk('path',{d:'M 0,0 C 3,-3 3,-9 0,-13 C -3,-9 -3,-3 0,0 Z',fill:C,'fill-opacity':'0.10',transform:`translate(${bx+spacing*0.5},${by-10}) rotate(-5)`}));
+      }
+      for (let p=0;p<12;p++){
+        const pa=p*30;
+        bg.appendChild(mk('circle',{cx:(bx+18*sd(pa)).toFixed(1),cy:(by-18*cd(pa)).toFixed(1),r:'4.5',fill:C,'fill-opacity':'0.10',stroke:C,'stroke-width':'0.3','stroke-opacity':'0.13'}));
+      }
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'18',fill:'none',stroke:C,'stroke-width':'0.5','stroke-opacity':'0.13'}));
+      for (let p=0;p<8;p++){
+        bg.appendChild(mk('path',{d:'M 0,0 C 3.5,-2 3.5,-10 0,-15 C -3.5,-10 -3.5,-2 0,0 Z',fill:C,'fill-opacity':'0.14',transform:`rotate(${p*45},${bx},${by}) translate(${bx},${by-7})`}));
+      }
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'9',fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':'0.15'}));
+      for (let p=0;p<8;p++){
+        const pa=p*45,pr=9,dx=bx+pr*sd(pa),dy=by-pr*cd(pa);
+        bg.appendChild(mk('rect',{x:(dx-1.5).toFixed(1),y:(dy-1.5).toFixed(1),width:'3',height:'3',fill:C,'fill-opacity':'0.14',transform:`rotate(45,${dx.toFixed(1)},${dy.toFixed(1)})`}));
+      }
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'4',fill:C,'fill-opacity':'0.18'}));
+      bg.appendChild(mk('circle',{cx:bx,cy:by,r:'1.8',fill:C,'fill-opacity':'0.26'}));
+      [45,135,225,315].forEach(aa=>bg.appendChild(mk('circle',{cx:(bx+24*sd(aa)).toFixed(1),cy:(by-24*cd(aa)).toFixed(1),r:'1.5',fill:C,'fill-opacity':'0.10'})));
+    }
+    btm.appendChild(bsvg);
+  }
+
+  // ── Top border band ─────────────────────────────────────────────────────────
+  const top = document.getElementById('alponaBorderTop');
+  if (top) {
+    const tsvg=document.createElementNS(NS,'svg');
+    tsvg.setAttribute('viewBox','0 0 1400 72');
+    tsvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    tsvg.style.width='100%'; tsvg.style.height='100%';
+    const tg=document.createElementNS(NS,'g');
+    tsvg.appendChild(tg);
+    tg.appendChild(mk('line',{x1:'0',y1:'62',x2:'1400',y2:'62',stroke:C,'stroke-width':'0.6','stroke-opacity':'0.16'}));
+    tg.appendChild(mk('line',{x1:'0',y1:'66',x2:'1400',y2:'66',stroke:C,'stroke-width':'0.3','stroke-opacity':'0.09'}));
+    tg.appendChild(mk('line',{x1:'0',y1:'4',x2:'1400',y2:'4',stroke:C,'stroke-width':'0.4','stroke-opacity':'0.12'}));
+    const tspacing=80,tcount=18;
+    for (let j=0;j<tcount;j++){
+      const tx=tspacing*0.5+j*tspacing,ty=36;
+      if (j<tcount-1){
+        const tnx=tx+tspacing;
+        tg.appendChild(mk('path',{d:`M ${tx+16},${ty} Q ${tx+tspacing*0.5},${ty+12} ${tnx-16},${ty}`,fill:'none',stroke:C,'stroke-width':'0.4','stroke-opacity':'0.10'}));
+      }
+      for (let p=0;p<8;p++) tg.appendChild(mk('circle',{cx:(tx+13*sd(p*45)).toFixed(1),cy:(ty-13*cd(p*45)).toFixed(1),r:'3.5',fill:C,'fill-opacity':'0.09',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.11'}));
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'13',fill:'none',stroke:C,'stroke-width':'0.45','stroke-opacity':'0.12'}));
+      for (let p=0;p<6;p++) tg.appendChild(mk('path',{d:'M 0,0 C 2.5,-1.5 2.5,-7 0,-11 C -2.5,-7 -2.5,-1.5 0,0 Z',fill:C,'fill-opacity':'0.13',transform:`rotate(${p*60},${tx},${ty}) translate(${tx},${ty-5})`}));
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'4',fill:'none',stroke:C,'stroke-width':'0.4','stroke-opacity':'0.14'}));
+      tg.appendChild(mk('circle',{cx:tx,cy:ty,r:'2',fill:C,'fill-opacity':'0.18'}));
+      [0,90,180,270].forEach(aa=>tg.appendChild(mk('circle',{cx:(tx+17*sd(aa)).toFixed(1),cy:(ty-17*cd(aa)).toFixed(1),r:'1.3',fill:C,'fill-opacity':'0.10'})));
+    }
+    top.appendChild(tsvg);
+  }
+
+  // ── Side borders ────────────────────────────────────────────────────────────
+  function buildSide(container, flip) {
+    const ssvg=document.createElementNS(NS,'svg');
+    ssvg.setAttribute('viewBox','0 0 52 900');
+    ssvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+    ssvg.style.width='100%'; ssvg.style.height='100%';
+    const sg=document.createElementNS(NS,'g');
+    ssvg.appendChild(sg);
+    const cx=flip?12:40;
+    sg.appendChild(mk('line',{x1:cx,y1:'0',x2:cx,y2:'900',stroke:C,'stroke-width':'0.5','stroke-opacity':'0.14'}));
+    sg.appendChild(mk('line',{x1:(cx+(flip?4:-4)),y1:'0',x2:(cx+(flip?4:-4)),y2:'900',stroke:C,'stroke-width':'0.25','stroke-opacity':'0.08'}));
+    for (let j=0;j<12;j++){
+      const vy=40+j*80;
+      if (j%2===0){
+        [10,7,4].forEach((r,ri)=>sg.appendChild(mk('circle',{cx,cy:vy,r,fill:'none',stroke:C,'stroke-width':'0.4','stroke-opacity':[0.14,0.11,0.09][ri]})));
+        dotRing(sg,cx,vy,10,8,1.4,0.10,0);
+        sg.appendChild(mk('circle',{cx,cy:vy,r:'3',fill:C,'fill-opacity':'0.16'}));
+        starburst(sg,cx,vy,4,12,8,0.09);
+        const dir=flip?1:-1;
+        const d=`M 0,0 C ${4*dir},-3 ${5*dir},-11 0,-17 C ${-5*dir},-11 ${-4*dir},-3 0,0 Z`;
+        sg.appendChild(mk('path',{d,fill:C,'fill-opacity':'0.11',transform:`translate(${cx},${vy-12}) rotate(${dir*25})`}));
+        sg.appendChild(mk('path',{d,fill:C,'fill-opacity':'0.09',transform:`translate(${cx},${vy+12}) rotate(${-dir*25}) rotate(180)`}));
+      } else {
+        const dir=flip?1:-1;
+        [-18,0,18].forEach(spread=>{
+          sg.appendChild(mk('path',{d:'M 0,0 C 3,-2 3.5,-10 0,-16 C -3.5,-10 -3,-2 0,0 Z',fill:C,'fill-opacity':'0.10',transform:`translate(${cx},${vy}) rotate(${90*dir+spread})`}));
+        });
+        sg.appendChild(mk('rect',{x:(cx-2.5),y:(vy-2.5),width:'5',height:'5',fill:C,'fill-opacity':'0.14',transform:`rotate(45,${cx},${vy})`}));
+        sg.appendChild(mk('circle',{cx,cy:(vy-22),r:'1.5',fill:C,'fill-opacity':'0.10'}));
+        sg.appendChild(mk('circle',{cx,cy:(vy+22),r:'1.5',fill:C,'fill-opacity':'0.10'}));
+      }
+      [0.3,0.7].forEach(off=>sg.appendChild(mk('circle',{cx,cy:(vy-40+off*80),r:'1',fill:C,'fill-opacity':'0.09'})));
+    }
+    container.appendChild(ssvg);
+  }
+  const lft=document.getElementById('alponaBorderLeft'),rgt=document.getElementById('alponaBorderRight');
+  if(lft) buildSide(lft,true);
+  if(rgt) buildSide(rgt,false);
+}
+
+// ─── Lotus petal builder ───────────────────────────────────────────────────────
+function buildLotus() {
+  function teardrop(hw, len) {
+    const h1=len*0.22,h2=len*0.70;
+    return `M 0,0 C ${hw},${-h1.toFixed(1)} ${(hw*0.55).toFixed(1)},${-h2.toFixed(1)} 0,${-len} C ${-(hw*0.55).toFixed(1)},${-h2.toFixed(1)} ${-hw},${-h1.toFixed(1)} 0,0`;
+  }
+  function addPetals(id, count, orbitR, hw, len, gradId, offset) {
+    const g=document.getElementById(id);
+    const d=teardrop(hw,len);
+    for (let i=0;i<count;i++){
+      const p=document.createElementNS(NS,'path');
+      p.setAttribute('d',d);
+      p.setAttribute('fill',`url(#${gradId})`);
+      p.setAttribute('transform',`rotate(${i*(360/count)+offset}) translate(0,${-orbitR})`);
+      g.appendChild(p);
+    }
+  }
+  addPetals('rayPetals',    16, 98,  7,  42, 'gradRay',          0);
+  addPetals('outerPetals',  12, 60, 28,  70, 'gradOuter',        0);
+  addPetals('midPetals',    12, 43, 22,  54, 'gradMid',          15);
+  addPetals('innerPetals',   8, 28, 17,  38, 'gradInner',        0);
+  addPetals('centerPetals',  6, 16, 12,  24, 'gradCenterPetals', 30);
+  // Vein tracery
+  const vg=document.getElementById('veins');
+  for (let i=0;i<8;i++){
+    const l=document.createElementNS(NS,'line');
+    l.setAttribute('x1','0'); l.setAttribute('y1','0');
+    l.setAttribute('x2','0'); l.setAttribute('y2','-130');
+    l.setAttribute('stroke','#c9a070'); l.setAttribute('stroke-width','0.5');
+    l.setAttribute('stroke-opacity','0.18');
+    l.setAttribute('transform',`rotate(${i*45} 0 0)`);
+    vg.appendChild(l);
+  }
+}
+
+// ─── State machine ─────────────────────────────────────────────────────────────
+const STATES = {
+  idle:       { status: 'At rest',                text: 'Sureline is ready. Begin speaking to activate the session.', statusColor: 'var(--text-primary)' },
+  listening:  { status: 'Listening\u2026',        text: '\u201cWhat was my last payment amount for account 4872?\u201d',       statusColor: 'var(--text-primary)' },
+  processing: { status: 'Querying database\u2026',text: 'Running SQL against customer_accounts \u2014 847ms',         statusColor: 'var(--text-primary)' },
+  speaking:   { status: 'Speaking',               text: 'Your last payment of \u20b912,500 was received on March 28th, 2026.', statusColor: 'var(--accent-orb)' },
+  error:      { status: 'Connection timeout',     text: 'Latency exceeded 3s threshold. Please retry or check data source.', statusColor: 'var(--accent-terra)' },
+};
+
+// ─── Sidebar builder (single source of truth for all admin screens) ────────────
+const NAV = [
+  { g: 'Monitor',   items: [
+    { s: 'admin',    l: 'Dashboard'     },
+    { s: 'sessions', l: 'Live Sessions' },
+    { s: 'orb',      l: 'Voice Agent'   },
+  ]},
+  { g: 'Configure', items: [
+    { s: 'agent', l: 'Agent Settings' },
+    { s: 'voice', l: 'Voice &amp; TTS' },
+  ]},
+];
+
+function _buildSidebar(activeScreen) {
+  const groups = NAV.map(({ g, items }) => `
+    <div class="nav-group">
+      <div class="nav-group-label">${g}</div>
+      ${items.map(({ s, l }) =>
+        `<div class="nav-item${s === activeScreen ? ' active' : ''}" onclick="navigate('${s}')"><div class="nav-dot"></div> ${l}</div>`
+      ).join('\n      ')}
+    </div>`).join('');
+  return `<div class="admin-logo">
+      <div class="admin-logo-text">Sureline</div>
+      <div class="admin-logo-sub">Admin Console</div>
+    </div>${groups}`;
+}
+
+function _renderSidebars(activeScreen) {
+  document.querySelectorAll('.admin-sidebar').forEach(el => {
+    el.innerHTML = _buildSidebar(activeScreen);
+  });
+}
+
+// ─── Live session state (populated by WS events, reset on page load) ──────────
+const _live = { queryCount: 0, latencies: [], client: '--', active: false };
+
+function _updateDashboard() {
+  const avg = _live.latencies.length
+    ? (_live.latencies.reduce((a, b) => a + b, 0) / _live.latencies.length).toFixed(2) + 's'
+    : '--';
+  const el = id => document.getElementById(id);
+  // Dashboard
+  if (el('dashQueries'))   el('dashQueries').textContent  = _live.queryCount;
+  if (el('dashLatency'))   el('dashLatency').textContent  = avg;
+  if (el('dashClient'))    el('dashClient').textContent   = _live.client;
+  if (el('dashStatus'))    el('dashStatus').textContent   = _live.active ? 'Active' : 'Idle';
+  if (el('dashStatusDot')) el('dashStatusDot').className  =
+    'badge ' + (_live.active ? 'badge-success' : 'badge-neutral');
+  // Live Sessions card
+  const card  = el('liveSessionCard');
+  const empty = el('liveSessionEmpty');
+  const badge = el('liveSessionBadge');
+  if (card && empty) {
+    card.style.display  = _live.active ? 'block' : 'none';
+    empty.style.display = _live.active ? 'none'  : 'block';
+  }
+  if (badge) {
+    badge.className  = 'badge ' + (_live.active ? 'badge-success' : 'badge-neutral');
+    badge.innerHTML  = _live.active
+      ? `<span>&#9679;</span> 1 Active Now`
+      : `<span>&#9679;</span> No active session`;
+  }
+  if (el('liveSessionClient'))  el('liveSessionClient').textContent  = _live.client;
+  if (el('liveSessionQueries')) el('liveSessionQueries').textContent = _live.queryCount;
+  if (el('liveSessionLatency')) el('liveSessionLatency').textContent = avg;
+}
+
+// ─── Screen router ─────────────────────────────────────────────────────────────
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(`screen-${screen}`);
+  if (el) el.classList.add('active');
+  _renderSidebars(screen);
+  // Sync mobile nav
+  document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+  const mobileBtn = document.getElementById(`mobileNav${screen.charAt(0).toUpperCase()+screen.slice(1)}`);
+  if (mobileBtn) mobileBtn.classList.add('active');
+  if (screen === 'admin') _updateDashboard();
+}
+
+function mobileNav(screen, btn) {
+  navigate(screen);
+  document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+window.mobileNav = mobileNav;
+window.navigate  = navigate;
+
+// ─── Pretext transcript layout ─────────────────────────────────────────────────
+let preparedTranscripts = new Map();
+async function initPretext() {
+  await document.fonts.ready;
+  const el = document.getElementById('orbTranscript');
+  if (!el) return;
+  function reprep() {
+    const font = getComputedStyle(el).font;
+    preparedTranscripts.set(el, prepare(el.textContent, font));
+    relayoutTranscript();
+  }
+  function relayoutTranscript() {
+    for (const [e, handle] of preparedTranscripts) {
+      const lh = parseFloat(getComputedStyle(e).lineHeight) || 24;
+      const { height } = layout(handle, e.clientWidth, lh);
+      e.style.minHeight = `${height}px`;
+    }
+  }
+  reprep();
+  new ResizeObserver(relayoutTranscript).observe(document.body);
+}
+
+// ─── Session timer ─────────────────────────────────────────────────────────────
+let _secs = 0, _timerInterval = null;
+function startTimer() {
+  _secs = 0;
+  clearInterval(_timerInterval);
+  _timerInterval = setInterval(() => {
+    _secs++;
+    const h=String(Math.floor(_secs/3600)).padStart(2,'0');
+    const m=String(Math.floor((_secs%3600)/60)).padStart(2,'0');
+    const s=String(_secs%60).padStart(2,'0');
+    const el=document.getElementById('sessionInfo');
+    if (el) el.textContent = `${h}:${m}:${s}  ·  ${_clientName}`;
+  }, 1000);
+}
+function stopTimer() { clearInterval(_timerInterval); _timerInterval=null; }
+let _clientName = '--';
+
+// ─── Public Integration API ────────────────────────────────────────────────────
+// Use this from your Pipecat pipeline or WebSocket handler:
+//
+//   window.SurelineOrb.setState('listening')
+//   window.SurelineOrb.setTranscript('What was Q3 revenue?')
+//   window.SurelineOrb.setLatency(1.24)
+//   window.SurelineOrb.startSession('HDFC Bank')
+//   window.SurelineOrb.endSession()
+//
+// Wire up events:
+//   window.SurelineOrb.on('endSession', () => { /* close WS, clean up */ })
+//   window.SurelineOrb.on('stateChange', ({from, to}) => { /* log state transitions */ })
+
+const _handlers = {};
+window.SurelineOrb = {
+  // Set agent animation state
+  setState(state, _btn) {
+    const prev = document.getElementById('orbWrap')?.dataset.state;
+    const wrap = document.getElementById('orbWrap');
+    const statusEl = document.getElementById('orbStatus');
+    const txEl = document.getElementById('orbTranscript');
+    if (!wrap || !STATES[state]) return;
+    wrap.dataset.state = state;
+    const s = STATES[state];
+    statusEl.textContent = s.status;
+    statusEl.style.color = s.statusColor;
+    txEl.textContent = s.text;
+    // Mirror state to Live Sessions card
+    const liveState = document.getElementById('liveSessionState');
+    if (liveState) liveState.textContent = s.status;
+    // Sync dev controls
+    document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+    if (_btn) _btn.classList.add('active');
+    else document.querySelectorAll('.state-btn').forEach(b => { if (b.textContent.toLowerCase().includes(state)) b.classList.add('active'); });
+    this.emit('stateChange', { from: prev, to: state });
+    // Recompute transcript layout
+    const el = document.getElementById('orbTranscript');
+    if (el && preparedTranscripts.has(el)) {
+      const font = getComputedStyle(el).font;
+      preparedTranscripts.set(el, prepare(el.textContent, font));
+    }
+  },
+  // Update transcript text (query or response)
+  setTranscript(text) {
+    const el = document.getElementById('orbTranscript');
+    if (!el) return;
+    el.textContent = text;
+    const font = getComputedStyle(el).font;
+    preparedTranscripts.set(el, prepare(text, font));
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || 24;
+    const { height } = layout(preparedTranscripts.get(el), el.clientWidth, lh);
+    el.style.minHeight = `${height}px`;
+  },
+  // Override status text
+  setStatus(text) {
+    const el = document.getElementById('orbStatus');
+    if (el) el.textContent = text;
+  },
+  // Set client name and session ID shown in chrome
+  setClient(name, sessionId='') {
+    _clientName = name;
+    const info = document.getElementById('sessionInfo');
+    if (info) info.textContent = `00:00:00  ·  ${name}${sessionId ? '  ·  '+sessionId : ''}`;
+  },
+  // Update latency display
+  setLatency(seconds) {
+    const el = document.getElementById('latencyDisplay');
+    if (!el) return;
+    const s = parseFloat(seconds);
+    el.textContent = s.toFixed(2) + 's';
+    el.style.color = s > 2.5 ? 'var(--accent-terra)' : s > 1.8 ? 'var(--accent-action)' : 'var(--accent-data)';
+  },
+  // Start a session (shows orb screen, begins timer)
+  startSession(clientName='Client') {
+    _clientName = clientName;
+    navigate('orb');
+    startTimer();
+    this.setState('idle');
+    document.getElementById('liveLabel').textContent = 'Live Session';
+  },
+  // End session
+  endSession() {
+    stopTimer();
+    this.setState('idle');
+    this.emit('endSession', { duration: _secs, client: _clientName });
+    navigate('admin');
+  },
+  // Navigate to a screen
+  navigate,
+  // Event emitter
+  on(event, callback) { _handlers[event] = callback; },
+  emit(event, data)   { if (_handlers[event]) _handlers[event](data); },
+
+  // ── Conversation log panel ────────────────────────────────────────────────
+  _pendingBotEntry: null,
+  _logAppend(type, label, text) {
+    const body = document.getElementById('convLogBody');
+    if (!body) return null;
+    const entry = document.createElement('div');
+    entry.className = `clog-entry ${type}`;
+    const lbl = document.createElement('span');
+    lbl.className = 'clog-label';
+    lbl.textContent = label;
+    const txt = document.createElement('span');
+    txt.className = 'clog-text';
+    txt.textContent = text;
+    entry.append(lbl, txt);
+    body.appendChild(entry);
+    body.scrollTop = body.scrollHeight;
+    return entry;
+  },
+  logUser(text) {
+    this._pendingBotEntry = null;
+    this._logAppend('user', 'You', text);
+  },
+  logBotChunk(text) {
+    const body = document.getElementById('convLogBody');
+    if (!body) return;
+    if (!this._pendingBotEntry) {
+      this._pendingBotEntry = this._logAppend('bot', 'Sureline', '');
+    }
+    const txt = this._pendingBotEntry?.querySelector('.clog-text');
+    if (txt) { txt.textContent += text; body.scrollTop = body.scrollHeight; }
+  },
+  logBotEnd() {
+    this._pendingBotEntry = null;
+  },
+  logInterruption() {
+    this._pendingBotEntry = null;
+    this._logAppend('interrupted', 'Interrupted', '— barge-in');
+  },
+
+  // ── Pipeline WebSocket connection with auto-reconnect ─────────────────────
+  _ws: null,
+  _wsBackoff: 1000,
+  _wsUrl: null,
+  connect(wsUrl) {
+    this._wsUrl = wsUrl;
+    this._doConnect();
+  },
+  _doConnect() {
+    const self = this;
+    const dot   = document.querySelector('.orb-live-dot');
+    const label = document.getElementById('liveLabel');
+    const setDot = (cls, text) => {
+      if (dot)   { dot.className = 'orb-live-dot ' + cls; }
+      if (label) { label.textContent = text; }
+    };
+
+    setDot('ws-connecting', 'Connecting...');
+    this.setStatus('Connecting to pipeline\u2026');
+    this.setTranscript('');
+
+    const ws = new WebSocket(this._wsUrl);
+    this._ws = ws;
+
+    ws.onopen = () => {
+      self._wsBackoff = 1000;
+      setDot('ws-connected', 'Live');
+      self.setStatus('At rest');
+      self.setTranscript('Sureline is ready. Begin speaking to activate the session.');
+      console.log('[Sureline] WS connected to pipeline');
+    };
+
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        switch (msg.type) {
+          case 'connected':    /* initial ping — already handled by onopen */ break;
+          case 'state':        self.setState(msg.state);       break;
+          case 'transcript': {
+            self.setTranscript(msg.text);
+            self.logUser(msg.text);
+            _live.queryCount++;
+            _updateDashboard();
+            break;
+          }
+          case 'status':       self.setStatus(msg.text);        break;
+          case 'latency': {
+            self.setLatency(msg.value);
+            _live.latencies.push(parseFloat(msg.value));
+            _updateDashboard();
+            break;
+          }
+          case 'response':     self.logBotChunk(msg.text);    break;
+          case 'response_end': self.logBotEnd();               break;
+          case 'interruption': self.logInterruption();         break;
+          case 'session_start': {
+            const client = msg.client || 'Sureline';
+            self.setClient(client);
+            self.setState('idle');
+            _live.client = client;
+            _live.active = true;
+            _updateDashboard();
+            break;
+          }
+          case 'session_end':
+            _live.active = false;
+            _updateDashboard();
+            self.endSession();
+            break;
+          case 'config': {
+            // Real provider names from the Python backend
+            const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+            set('dashModel',    msg.llm  || '--');
+            set('cfgLlm',       msg.llm  || '--');
+            set('cfgStt',       msg.stt  || '--');
+            set('cfgTts',       msg.tts  || '--');
+            set('cfgLlmBadge',  msg.llm  || '--');
+            set('cfgSttBadge',  msg.stt  || '--');
+            set('cfgTtsBadge',  msg.tts  || '--');
+            break;
+          }
+          default: break;
+        }
+      } catch(e) { console.error('[Sureline] WS parse error', e); }
+    };
+
+    ws.onclose = () => {
+      if (self._ws !== ws) return; // a newer connection took over
+      setDot('ws-disconnected', 'Offline');
+      self.setStatus('Pipeline offline\u2026');
+      // Reconnect with exponential backoff, capped at 30s
+      setTimeout(() => self._doConnect(), self._wsBackoff);
+      self._wsBackoff = Math.min(self._wsBackoff * 2, 30_000);
+    };
+
+    ws.onerror = () => { /* onclose fires next — handled there */ };
+  },
+};
+
+// ─── Login flow ────────────────────────────────────────────────────────────────
+document.getElementById('btnLogin')?.addEventListener('click', () => {
+  const email = document.getElementById('loginEmail')?.value;
+  if (!email) return;
+  sessionStorage.setItem('sureline_client', email);
+  _clientName = email.split('@')[0];
+  navigate('orb');
+  startTimer();
+});
+document.getElementById('btnSso')?.addEventListener('click', () => {
+  sessionStorage.setItem('sureline_client', 'sso');
+  navigate('admin');
+});
+document.getElementById('endSessionBtn')?.addEventListener('click', () => {
+  window.SurelineOrb.endSession();
+});
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Build visuals
+  initAlpona();
+  buildLotus();
+  initPretext().catch(console.warn);
+
+  // Greet admin by time of day
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greetEl = document.getElementById('adminGreeting');
+  if (greetEl) greetEl.textContent = greet;
+
+  // Dev mode: show state controls if ?dev=1
+  if (new URLSearchParams(location.search).get('dev') === '1') {
+    document.getElementById('devControls').style.display = 'flex';
+  }
+
+  // Always go straight to the orb — no login needed for local mode
+  navigate('orb');
+  startTimer();
+
+  // Connect to the local Pipecat pipeline WebSocket
+  SurelineOrb.connect('ws://127.0.0.1:8765');
+
+  // Filter chip interactivity
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.closest('.call-filters').querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+});
+</script>
+</body>
+</html>
